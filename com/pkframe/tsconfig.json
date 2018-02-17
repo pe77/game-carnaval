@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es5",
+        "sourceMap": false,
+        "declaration":true,
+        "outFile": "build/pkframework.js"
+    },
+    "exclude": [
+        "assets",
+        "build",
+        "vendor"
+    ]
+}
