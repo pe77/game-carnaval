@@ -69,7 +69,9 @@ module GameBase
                 
 
                 // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-                this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
+                var platformJoin = this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
+                // console.log('platformJoin:', platformJoin)
+                // this.game.physics.box2d.world.DestroyJoint(platformJoin);
 
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
@@ -80,6 +82,32 @@ module GameBase
                     if (!begin || body1.id == body2.id || !body2.element)
                         return;
                     //
+
+                    setTimeout(()=>{
+                        if(!platformJoin)
+                            return;
+                        //
+
+                        console.log('DestroyJoint >>> ')
+                        this.game.physics.box2d.world.DestroyJoint(platformJoin);
+                        platformJoin = null;
+
+                        if(platform2)
+                        {
+                            platform2.applyForce(300*-this.direction, -600)
+                            platform2.rotation = 10;
+                            setTimeout(()=>{
+                                platform2.destroy();
+                            }, 3000)
+                        }
+                        
+                    }, 100)
+                    
+
+                    
+                    // console.log('this.game.physics.box2d.world>>', this.game.physics.box2d.world)
+
+                    // platformJoin.IsActive(false);
 
                     var advCar:Car.Car = <Car.Car>body2.element;
 

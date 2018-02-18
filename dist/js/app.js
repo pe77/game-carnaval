@@ -993,7 +993,9 @@ var GameBase;
                 // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
                 // this.game.physics.box2d.prismaticJoint(this.base.body, platform2, 0, -1, 0, -20, 0, 0, 1500, 200, true, 0, 50, true);
                 // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-                this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
+                var platformJoin = this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
+                // console.log('platformJoin:', platformJoin)
+                // this.game.physics.box2d.world.DestroyJoint(platformJoin);
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
                 this.base.body.element = this;
@@ -1001,6 +1003,23 @@ var GameBase;
                     if (!begin || body1.id == body2.id || !body2.element)
                         return;
                     //
+                    setTimeout(function () {
+                        if (!platformJoin)
+                            return;
+                        //
+                        console.log('DestroyJoint >>> ');
+                        _this.game.physics.box2d.world.DestroyJoint(platformJoin);
+                        platformJoin = null;
+                        if (platform2) {
+                            platform2.applyForce(300 * -_this.direction, -600);
+                            platform2.rotation = 10;
+                            setTimeout(function () {
+                                platform2.destroy();
+                            }, 3000);
+                        }
+                    }, 100);
+                    // console.log('this.game.physics.box2d.world>>', this.game.physics.box2d.world)
+                    // platformJoin.IsActive(false);
                     var advCar = body2.element;
                     _this.event.dispatch(GameBase.Car.E.CarEvent.OnHit, advCar);
                 }, this);
