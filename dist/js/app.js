@@ -420,6 +420,15 @@ var Pk;
             var bmd = Pk.PkUtils.createSquareBitmap(game, width, height, color);
             return game.add.sprite(0, 0, bmd);
         };
+        PkUtils.createCircle = function (game, diameter, color) {
+            if (color === void 0) { color = "#000000"; }
+            var circleBtm = game.add.graphics(0, 0);
+            //	Shapes drawn to the Graphics object must be filled.
+            circleBtm.beginFill(0xffffff);
+            //	Here we'll draw a circle
+            circleBtm.drawCircle(0, 0, diameter);
+            return game.add.sprite(0, 0, circleBtm);
+        };
         return PkUtils;
     }());
     Pk.PkUtils = PkUtils;
@@ -448,6 +457,15 @@ var GameBase;
         return Game;
     }(Pk.PkGame));
     GameBase.Game = Game;
+    var CollisionCategories;
+    (function (CollisionCategories) {
+        CollisionCategories.Car = 6;
+        CollisionCategories.Player = 1;
+        CollisionCategories.PowerUps = 2;
+        CollisionCategories.Floor = 3;
+        CollisionCategories.Die = 4;
+        CollisionCategories.Banner = 5;
+    })(CollisionCategories = GameBase.CollisionCategories || (GameBase.CollisionCategories = {}));
     var Config = (function (_super) {
         __extends(Config, _super);
         function Config() {
@@ -458,7 +476,7 @@ var GameBase;
             _this.loaderState = GameBase.Loader;
             // this.canvasSize = ["100%", 720];
             _this.canvasSize = [800, 600];
-            _this.initialState = 'Intro';
+            _this.initialState = 'Main';
             return _this;
         }
         return Config;
@@ -807,47 +825,6 @@ var GameBase;
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
-    var Audience;
-    (function (Audience_1) {
-        var Audience = (function (_super) {
-            __extends(Audience, _super);
-            function Audience(game) {
-                return _super.call(this, game) || this;
-            }
-            Audience.prototype.create = function () {
-                // add os sprites da lateral, nas laterais. ORA BOLAS...
-                this.leftSprite = this.game.add.sprite(0, 0, 'aud-left');
-                this.rightSprite = this.game.add.sprite(0, 0, 'aud-right');
-                this.leftSprite.x = 0;
-                this.leftSprite.y = this.game.world.height - this.leftSprite.height;
-                this.rightSprite.x = this.game.world.width - this.rightSprite.width;
-                this.rightSprite.y = this.game.world.height - this.rightSprite.height;
-                // a parte do meio
-                this.middleTileSprite = this.game.add.tileSprite(0, 0, this.game.world.width, 100, 'aud-middle');
-                this.middleTileSprite.y = this.game.world.height - this.middleTileSprite.height;
-                console.log('---- foi');
-                this.add(this.rightSprite);
-                this.add(this.leftSprite);
-                this.add(this.middleTileSprite);
-            };
-            Audience.prototype.pulse = function () {
-                // se houver alguma animação, pausa
-                if (this.tween)
-                    this.tween.stop(true);
-                //
-                this.tween = this.addTween(this).to({
-                    y: this.y + 10
-                }, 200, Phaser.Easing.Linear.None, true, 0, -1);
-                this.tween.yoyo(true);
-                console.log('AUDIENCE PULSE');
-            };
-            return Audience;
-        }(Pk.PkElement));
-        Audience_1.Audience = Audience;
-    })(Audience = GameBase.Audience || (GameBase.Audience = {}));
-})(GameBase || (GameBase = {}));
-var GameBase;
-(function (GameBase) {
     var Bar;
     (function (Bar) {
         var Vertical = (function (_super) {
@@ -914,6 +891,96 @@ var GameBase;
         }(Pk.PkElement));
         Bar.Vertical = Vertical;
     })(Bar = GameBase.Bar || (GameBase.Bar = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car_1) {
+        var Car = (function (_super) {
+            __extends(Car, _super);
+            function Car(game) {
+                var _this = _super.call(this, game) || this;
+                _this.size = 50;
+                _this.frequency = 3.5;
+                _this.damping = 0.5;
+                _this.motorTorque = 2;
+                _this.motorSpeed = 50;
+                _this.rideHeight = 0.5;
+                _this.direction = 1;
+                _this.driveJoints = [];
+                _this.name = '-nome padrão-';
+                return _this;
+            }
+            Car.prototype.create = function (position) {
+                var _this = this;
+                if (position === void 0) { position = new Phaser.Point(0, 0); }
+                this.base = new Phaser.Sprite(this.game, 0, 0);
+                this.game.physics.box2d.enable(this.base);
+                this.base.body.setCircle(20);
+                this.base.body.x = position.x;
+                this.base.body.y = position.y;
+                this.base.body.fixedRotation = true;
+                this.sensor = this.base.body.addRectangle(this.size * 3, this.size, 0, this.size / 2 - this.size / 2);
+                this.sensor.SetSensor(true);
+                var PTM = this.size;
+                var wheelBodies = [];
+                wheelBodies[0] = new Phaser.Physics.Box2D.Body(this.game, null, -1 * PTM, 0.6 * -PTM);
+                wheelBodies[1] = new Phaser.Physics.Box2D.Body(this.game, null, 1 * PTM, 0.6 * -PTM);
+                wheelBodies[0].setCircle(0.4 * PTM);
+                wheelBodies[1].setCircle(0.4 * PTM);
+                this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
+                this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1], 1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // front
+                this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
+                this.base.body.element = this;
+                this.base.body.setCategoryContactCallback(GameBase.CollisionCategories.Car, function (body1, body2, fixture1, fixture2, begin) {
+                    if (!begin || body1.id == body2.id || !body2.element)
+                        return;
+                    //
+                    var advCar = body2.element;
+                    if (_this.name == 'Carro 1') {
+                        console.log(_this.name + ' bateu no carro:', advCar.name);
+                        // força aplicada no adversario
+                        var forceX = 1500;
+                        var forceY = -2000;
+                        advCar.base.body.applyForce(forceX * _this.direction, forceY);
+                        // força aplicada em si mesmo
+                        _this.base.body.applyForce(forceX * -_this.direction, forceY / 2);
+                    }
+                    //
+                }, this);
+            };
+            Car.prototype.update = function () {
+                for (var i = 0; i < 2; i++) {
+                    this.driveJoints[i].EnableMotor(true);
+                    this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);
+                }
+            };
+            return Car;
+        }(Pk.PkElement));
+        Car_1.Car = Car;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Floor;
+    (function (Floor_1) {
+        var Floor = (function (_super) {
+            __extends(Floor, _super);
+            function Floor(game) {
+                return _super.call(this, game) || this;
+            }
+            Floor.prototype.create = function () {
+                this.body = Pk.PkUtils.createSquare(this.game, this.game.world.width, 30);
+                this.body.y = this.game.world.height - this.body.height / 2;
+                this.body.x = this.game.world.centerX;
+                this.game.physics.box2d.enable(this.body);
+                this.body.body.static = true;
+                this.body.body.setCollisionCategory(GameBase.CollisionCategories.Floor);
+            };
+            return Floor;
+        }(Pk.PkElement));
+        Floor_1.Floor = Floor;
+    })(Floor = GameBase.Floor || (GameBase.Floor = {}));
 })(GameBase || (GameBase = {}));
 /// <reference path='../../pkframe/refs.ts' />
 var GameBase;
@@ -1001,12 +1068,30 @@ var GameBase;
             // change state bg
             this.game.stage.backgroundColor = "#938da0";
             // prevent stop update when focus out
-            this.stage.disableVisibilityChange = true;
+            // this.stage.disableVisibilityChange = true;
+            // Enable Box2D physics
+            this.game.physics.startSystem(Phaser.Physics.BOX2D);
+            this.game.physics.box2d.gravity.y = 500;
+            this.game.physics.box2d.restitution = 0.3;
+            this.game.physics.box2d.setBoundsToWorld();
+            // chão
+            this.floor = new GameBase.Floor.Floor(this.game);
+            this.floor.create();
+            // chão
+            var car1 = new GameBase.Car.Car(this.game);
+            car1.name = 'Carro 1';
+            car1.motorSpeed = 100;
+            car1.create(new Phaser.Point(100, 200));
+            var car2 = new GameBase.Car.Car(this.game);
+            car2.direction = -1;
+            car2.name = 'Carro 2';
+            car2.create(new Phaser.Point(this.game.world.width, 200));
         };
         Main.prototype.playSound = function () {
             // play music
         };
         Main.prototype.render = function () {
+            this.game.debug.box2dWorld();
             this.game.debug.text('Main Screen', this.game.world.centerX, 35);
         };
         // calls when leaving state

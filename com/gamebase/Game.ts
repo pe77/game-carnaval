@@ -14,6 +14,16 @@ module GameBase {
 
         }
     }
+
+    export module CollisionCategories
+    {
+        export const Car:number = 6;
+        export const Player:number = 1;
+        export const PowerUps:number = 2;
+        export const Floor:number = 3;
+        export const Die:number = 4;
+        export const Banner:number = 5;
+    }
  
     class Config extends Pk.PkConfig
     {
@@ -32,7 +42,7 @@ module GameBase {
             this.canvasSize = [800, 600];
 
 
-            this.initialState = 'Intro';
+            this.initialState = 'Main';
         }
     }
     
