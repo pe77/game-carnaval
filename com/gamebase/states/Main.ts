@@ -9,6 +9,8 @@ module GameBase
 
 		floor:Floor.Floor;
 
+		battle:Battle.Battle;
+
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
@@ -28,23 +30,29 @@ module GameBase
 			this.game.physics.startSystem(Phaser.Physics.BOX2D);
 			this.game.physics.box2d.gravity.y = 500;
 			this.game.physics.box2d.restitution = 0.3;
+			
+			this.game.physics.box2d.debugDraw.joints = true;
 			this.game.physics.box2d.setBoundsToWorld();
 
 			// chão
 			this.floor = new Floor.Floor(this.game);
 			this.floor.create();
 
+			// gerenciador da batalha
+			this.battle = new Battle.Battle(this.game);
+
 			// chão
 			var car1 = new Car.Car(this.game);
 			car1.name = 'Carro 1';
 			car1.motorSpeed = 100;
-			car1.create(new Phaser.Point(100, 200));
 
 			var car2 = new Car.Car(this.game);
 			car2.direction = -1;
 			car2.name = 'Carro 2';
-			car2.create(new Phaser.Point(this.game.world.width, 200));
-			
+
+			// add os carros
+			this.battle.setCars(car1, car2);
+			this.battle.start();
 		}
 
 		playSound()
@@ -56,6 +64,7 @@ module GameBase
 		render()
         {
 			this.game.debug.box2dWorld();
+			
             this.game.debug.text('Main Screen', this.game.world.centerX, 35);
         }
 		

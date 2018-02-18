@@ -894,6 +894,59 @@ var GameBase;
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
+    var Battle;
+    (function (Battle_1) {
+        var Battle = (function (_super) {
+            __extends(Battle, _super);
+            function Battle(game) {
+                return _super.call(this, game) || this;
+            }
+            Battle.prototype.setCars = function (carA, carB) {
+                // se já existe algum carro, destroi
+                if (this.cars && this.cars.length)
+                    for (var i in this.cars)
+                        this.cars[i].kill();
+                //
+                this.cars = [carA, carB];
+            };
+            Battle.prototype.start = function () {
+                var _this = this;
+                // se não houver carros, dropa
+                if (!this.cars.length)
+                    return false;
+                //
+                // cria / posiciona
+                this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
+                this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
+                // registra o evento
+                this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
+                    console.log('carro 1 bateu');
+                    _this.carHit(_this.cars[0], _this.cars[1]);
+                }, this);
+                this.cars[1].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
+                    console.log('carro 2 bateu');
+                    _this.carHit(_this.cars[1], _this.cars[0]);
+                }, this);
+            };
+            Battle.prototype.carHit = function (carA, carB) {
+                // aplica o dano
+                var damage = carB.applyDamage(carA.damage);
+                // calcula o impulso em cima do dano causado
+                var forceX = 750 + (300 * damage);
+                var forceY = -750 - (300 * damage);
+                carB.base.body.applyForce(forceX * carA.direction, forceY);
+                // uma base força aplicada em si mesmo
+                carA.base.body.applyForce(200 * -carA.direction, 200 / 2);
+                // balança a camera
+                this.game.camera.shake(0.01, 100);
+            };
+            return Battle;
+        }(Pk.PkElement));
+        Battle_1.Battle = Battle;
+    })(Battle = GameBase.Battle || (GameBase.Battle = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
     var Car;
     (function (Car_1) {
         var Car = (function (_super) {
@@ -907,13 +960,16 @@ var GameBase;
                 _this.motorSpeed = 50;
                 _this.rideHeight = 0.5;
                 _this.direction = 1;
+                _this.damage = [1, 6];
                 _this.driveJoints = [];
                 _this.name = '-nome padrão-';
                 return _this;
             }
-            Car.prototype.create = function (position) {
+            Car.prototype.build = function (position, direction) {
                 var _this = this;
                 if (position === void 0) { position = new Phaser.Point(0, 0); }
+                if (direction === void 0) { direction = 1; }
+                this.direction = direction;
                 this.base = new Phaser.Sprite(this.game, 0, 0);
                 this.game.physics.box2d.enable(this.base);
                 this.base.body.setCircle(20);
@@ -924,12 +980,21 @@ var GameBase;
                 this.sensor.SetSensor(true);
                 var PTM = this.size;
                 var wheelBodies = [];
-                wheelBodies[0] = new Phaser.Physics.Box2D.Body(this.game, null, -1 * PTM, 0.6 * -PTM);
-                wheelBodies[1] = new Phaser.Physics.Box2D.Body(this.game, null, 1 * PTM, 0.6 * -PTM);
+                wheelBodies[0] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
+                wheelBodies[1] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
                 wheelBodies[0].setCircle(0.4 * PTM);
                 wheelBodies[1].setCircle(0.4 * PTM);
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
                 this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1], 1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // front
+                // plataforma
+                var platform2 = new Phaser.Physics.Box2D.Body(this.game, null, 0, 0, 2);
+                platform2.setRectangle(100, 20, 0, 0, 0);
+                // this.game.physics.box2d.enable(platform2);
+                // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
+                // this.game.physics.box2d.prismaticJoint(this.base.body, platform2, 0, -1, 0, -20, 0, 0, 1500, 200, true, 0, 50, true);
+                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
+                this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
+                // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
                 this.base.body.element = this;
                 this.base.body.setCategoryContactCallback(GameBase.CollisionCategories.Car, function (body1, body2, fixture1, fixture2, begin) {
@@ -937,19 +1002,36 @@ var GameBase;
                         return;
                     //
                     var advCar = body2.element;
-                    if (_this.name == 'Carro 1') {
-                        console.log(_this.name + ' bateu no carro:', advCar.name);
-                        // força aplicada no adversario
-                        var forceX = 1500;
-                        var forceY = -2000;
-                        advCar.base.body.applyForce(forceX * _this.direction, forceY);
-                        // força aplicada em si mesmo
-                        _this.base.body.applyForce(forceX * -_this.direction, forceY / 2);
-                        // balança a camera
-                        _this.game.camera.shake(0.01, 100);
-                    }
-                    //
+                    _this.event.dispatch(GameBase.Car.E.CarEvent.OnHit, advCar);
                 }, this);
+                // drag
+                this.game.input.onDown.add(this.mouseDragStart, this);
+                this.game.input.addMoveCallback(this.mouseDragMove, this);
+                this.game.input.onUp.add(this.mouseDragEnd, this);
+            };
+            Car.prototype.mouseDragStart = function () {
+                this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
+            };
+            Car.prototype.mouseDragMove = function () {
+                this.game.physics.box2d.mouseDragMove(this.game.input.mousePointer);
+            };
+            Car.prototype.mouseDragEnd = function () {
+                this.game.physics.box2d.mouseDragEnd();
+            };
+            Car.prototype.kill = function () {
+                // dispara o evento de morte
+                this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
+            };
+            Car.prototype.applyDamage = function (damageRange) {
+                // randomiza o dano
+                var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
+                // anima
+                var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
+                iconUp.create();
+                iconUp.x = this.base.body.x - this.base.width / 2;
+                iconUp.y = this.base.body.y - 50;
+                iconUp.go();
+                return damage;
             };
             Car.prototype.update = function () {
                 for (var i = 0; i < 2; i++) {
@@ -960,7 +1042,48 @@ var GameBase;
             return Car;
         }(Pk.PkElement));
         Car_1.Car = Car;
+        var E;
+        (function (E) {
+            var CarEvent;
+            (function (CarEvent) {
+                CarEvent.OnHit = "CarEventOnHit";
+                CarEvent.OnKill = "CarEventOnKill";
+            })(CarEvent = E.CarEvent || (E.CarEvent = {}));
+        })(E = Car_1.E || (Car_1.E = {}));
     })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Icon;
+    (function (Icon_1) {
+        var Icon = (function (_super) {
+            __extends(Icon, _super);
+            function Icon(game, message) {
+                var _this = _super.call(this, game) || this;
+                _this.message = message;
+                return _this;
+            }
+            Icon.prototype.create = function () {
+                this.text = this.game.add.text(0, 0, this.message, // text
+                {
+                    font: "28px Love Story Rough",
+                    fill: "#202020"
+                } // font style
+                );
+                this.add(this.text);
+            };
+            Icon.prototype.go = function () {
+                var _this = this;
+                this.addTween(this).to({
+                    y: this.y - 100
+                }, 1000, Phaser.Easing.Circular.Out, true).onComplete.add(function () {
+                    _this.destroy();
+                }, this);
+            };
+            return Icon;
+        }(Pk.PkElement));
+        Icon_1.Icon = Icon;
+    })(Icon = GameBase.Icon || (GameBase.Icon = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
@@ -1075,19 +1198,23 @@ var GameBase;
             this.game.physics.startSystem(Phaser.Physics.BOX2D);
             this.game.physics.box2d.gravity.y = 500;
             this.game.physics.box2d.restitution = 0.3;
+            this.game.physics.box2d.debugDraw.joints = true;
             this.game.physics.box2d.setBoundsToWorld();
             // chão
             this.floor = new GameBase.Floor.Floor(this.game);
             this.floor.create();
+            // gerenciador da batalha
+            this.battle = new GameBase.Battle.Battle(this.game);
             // chão
             var car1 = new GameBase.Car.Car(this.game);
             car1.name = 'Carro 1';
             car1.motorSpeed = 100;
-            car1.create(new Phaser.Point(100, 200));
             var car2 = new GameBase.Car.Car(this.game);
             car2.direction = -1;
             car2.name = 'Carro 2';
-            car2.create(new Phaser.Point(this.game.world.width, 200));
+            // add os carros
+            this.battle.setCars(car1, car2);
+            this.battle.start();
         };
         Main.prototype.playSound = function () {
             // play music
