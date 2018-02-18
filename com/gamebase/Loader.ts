@@ -75,6 +75,9 @@ module GameBase {
             // intro
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
+
+            // car parts
+            this.load.image('car-1-tire', 'assets/default/car/tire.png');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

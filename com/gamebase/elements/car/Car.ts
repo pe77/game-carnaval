@@ -48,9 +48,16 @@ module GameBase
                 
                 var PTM = this.size;
 
+                // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
+                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 0, 'car-1-tire');
+                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 0, 'car-1-tire');
+
+                this.game.physics.box2d.enable(tireSprite1);
+                this.game.physics.box2d.enable(tireSprite2);
+
                 var wheelBodies = [];
-                wheelBodies[0] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
-                wheelBodies[1] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
+                wheelBodies[0] = tireSprite1.body;
+                wheelBodies[1] = tireSprite2.body;
                 wheelBodies[0].setCircle(0.4*PTM);
                 wheelBodies[1].setCircle(0.4*PTM);
                 

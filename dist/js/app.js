@@ -611,6 +611,8 @@ var GameBase;
             // intro
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
+            // car parts
+            this.load.image('car-1-tire', 'assets/default/car/tire.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -979,9 +981,14 @@ var GameBase;
                 this.sensor = this.base.body.addRectangle(this.size * 3, this.size, 0, this.size / 2 - this.size / 2);
                 this.sensor.SetSensor(true);
                 var PTM = this.size;
+                // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
+                var tireSprite1 = this.game.add.sprite(0, 0, 'car-1-tire');
+                var tireSprite2 = this.game.add.sprite(0, 0, 'car-1-tire');
+                this.game.physics.box2d.enable(tireSprite1);
+                this.game.physics.box2d.enable(tireSprite2);
                 var wheelBodies = [];
-                wheelBodies[0] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
-                wheelBodies[1] = new Phaser.Physics.Box2D.Body(this.game, null, 0, 500);
+                wheelBodies[0] = tireSprite1.body;
+                wheelBodies[1] = tireSprite2.body;
                 wheelBodies[0].setCircle(0.4 * PTM);
                 wheelBodies[1].setCircle(0.4 * PTM);
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
