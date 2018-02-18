@@ -945,6 +945,8 @@ var GameBase;
                         advCar.base.body.applyForce(forceX * _this.direction, forceY);
                         // força aplicada em si mesmo
                         _this.base.body.applyForce(forceX * -_this.direction, forceY / 2);
+                        // balança a camera
+                        _this.game.camera.shake(0.01, 100);
                     }
                     //
                 }, this);

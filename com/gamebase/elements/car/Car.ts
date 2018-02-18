@@ -74,6 +74,9 @@ module GameBase
 
                         // força aplicada em si mesmo
                         this.base.body.applyForce(forceX*-this.direction, forceY/2);
+
+                        // balança a camera
+                        this.game.camera.shake(0.01, 100);
                     }
                         
                     //
