@@ -35,12 +35,12 @@ module GameBase
 
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, (e, otherPlayer:Car.Car)=>{
-                    console.log('carro 1 bateu');
+                    // console.log('carro 1 bateu');
                     this.carHit(this.cars[0], this.cars[1]);
                 }, this);
 
                 this.cars[1].event.add(GameBase.Car.E.CarEvent.OnHit, (e, otherPlayer:Car.Car)=>{
-                    console.log('carro 2 bateu');
+                    // console.log('carro 2 bateu');
                     this.carHit(this.cars[1], this.cars[0]);
                 }, this);
 

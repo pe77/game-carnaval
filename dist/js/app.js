@@ -922,11 +922,11 @@ var GameBase;
                 this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
-                    console.log('carro 1 bateu');
+                    // console.log('carro 1 bateu');
                     _this.carHit(_this.cars[0], _this.cars[1]);
                 }, this);
                 this.cars[1].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
-                    console.log('carro 2 bateu');
+                    // console.log('carro 2 bateu');
                     _this.carHit(_this.cars[1], _this.cars[0]);
                 }, this);
             };
@@ -993,16 +993,12 @@ var GameBase;
                 wheelBodies[1].setCircle(0.4 * PTM);
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
                 this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1], 1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // front
-                // plataforma
-                var platform2 = new Phaser.Physics.Box2D.Body(this.game, null, 0, 0, 2);
-                platform2.setRectangle(100, 20, 0, 0, 0);
-                // this.game.physics.box2d.enable(platform2);
-                // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
-                // this.game.physics.box2d.prismaticJoint(this.base.body, platform2, 0, -1, 0, -20, 0, 0, 1500, 200, true, 0, 50, true);
-                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-                var platformJoin = this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
-                // console.log('platformJoin:', platformJoin)
-                // this.game.physics.box2d.world.DestroyJoint(platformJoin);
+                var platform = new GameBase.Car.Platform(this.game, this);
+                platform.build(this.direction, this.base.body);
+                var platform2 = new GameBase.Car.Platform(this.game, this);
+                platform2.build(-this.direction, platform.base);
+                var platform3 = new GameBase.Car.Platform(this.game, this);
+                platform3.build(this.direction, platform2.base);
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
                 this.base.body.element = this;
@@ -1011,22 +1007,9 @@ var GameBase;
                         return;
                     //
                     setTimeout(function () {
-                        if (!platformJoin)
-                            return;
-                        //
-                        console.log('DestroyJoint >>> ');
-                        _this.game.physics.box2d.world.DestroyJoint(platformJoin);
-                        platformJoin = null;
-                        if (platform2) {
-                            platform2.applyForce(300 * -_this.direction, -600);
-                            platform2.rotation = 10;
-                            setTimeout(function () {
-                                platform2.destroy();
-                            }, 3000);
-                        }
+                        // console.log('DestroyJoint >>> ')
+                        // platform.kill();
                     }, 100);
-                    // console.log('this.game.physics.box2d.world>>', this.game.physics.box2d.world)
-                    // platformJoin.IsActive(false);
                     var advCar = body2.element;
                     _this.event.dispatch(GameBase.Car.E.CarEvent.OnHit, advCar);
                 }, this);
@@ -1076,6 +1059,86 @@ var GameBase;
                 CarEvent.OnKill = "CarEventOnKill";
             })(CarEvent = E.CarEvent || (E.CarEvent = {}));
         })(E = Car_1.E || (Car_1.E = {}));
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
+        var Platform = (function (_super) {
+            __extends(Platform, _super);
+            function Platform(game, car) {
+                var _this = _super.call(this, game) || this;
+                _this.size = 100;
+                _this.direction = 1;
+                _this.death = false;
+                _this.car = car; // referencia do carro... vai que precisa
+                return _this;
+            }
+            Platform.prototype.build = function (direction, body) {
+                // salva a direção
+                this.direction = direction;
+                // cria a plataforma
+                this.base = new Phaser.Physics.Box2D.Body(this.game, null, 0, 0, 2);
+                this.base.setRectangle(this.size, 10, 0, 0, 0);
+                this.base.x = body.x; //direction == 1 ? 100 : 600;
+                // this.base.x = body.y - 200;
+                console.log('body position', body.x, body.y);
+                // var platform2:box2d.b2Fixture = this.base.addRectangle(this.size, 10, 0, -50, 0);
+                // this.base.addRectangle(this.size, 10, 0, -100, 0);
+                // var platform2:Phaser.Physics.Box2D.Body = new Phaser.Physics.Box2D.Body(this.game, null, 200, 200, 2);
+                // platform2.
+                /*
+                var platform2 = new Phaser.Sprite(this.game, body.x, 0);
+                this.game.physics.box2d.enable(platform2);
+                platform2.body.setRectangle(this.size, 10, 0, 0, 0);
+
+
+                var platform3 = new Phaser.Sprite(this.game, body.x, 0);
+                this.game.physics.box2d.enable(platform3);
+                platform3.body.setRectangle(this.size, 10, 0, 0, 0);
+                
+                
+                // direction = 1;
+                // cria o vinculo
+                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
+
+                setTimeout(()=>{
+                    // platform2.SetRestitution(3);
+                    // platform2.Destroy()
+                    console.log('foiii')
+                    // this.base.removeFixture(platform2);
+                    // this.base.clearFixtures()
+                    this.game.physics.box2d.weldJoint(this.base, platform2, 0, 0, 40 * -direction, 80, 5, 0.0);
+
+                    this.game.physics.box2d.weldJoint(platform2, platform3, 0, 0, 40 * direction, 80, 5, 0.0);
+                }, 1000);
+                */
+                setTimeout(function () {
+                    // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
+                }, 100);
+                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 5, 0.0);
+                // return this.joint; // retorna o vinculo
+            };
+            Platform.prototype.kill = function () {
+                var _this = this;
+                // se já matou.. não mata
+                if (this.death)
+                    return;
+                //
+                this.death = true; // salva que já matou
+                // remove o vinculo
+                this.game.physics.box2d.world.DestroyJoint(this.joint);
+                // joga pra cima
+                this.base.applyForce(300 * -this.direction, -400);
+                this.base.rotation = 90;
+                setTimeout(function () {
+                    _this.base.destroy(); // mata de vez
+                }, 3000);
+            };
+            return Platform;
+        }(Pk.PkElement));
+        Car.Platform = Platform;
     })(Car = GameBase.Car || (GameBase.Car = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;

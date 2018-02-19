@@ -64,21 +64,14 @@ module GameBase
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1*PTM, this.rideHeight*PTM, 0,0, 0,1, this.frequency, this.damping, 0, this.motorTorque, true ); // rear
 	            this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1],  1*PTM, this.rideHeight*PTM, 0,0, 0,1, this.frequency, this.damping, 0, this.motorTorque, true ); // front
 
+                var platform:Car.Platform = new GameBase.Car.Platform(this.game, this)
+                platform.build(this.direction, this.base.body);
 
-                 // plataforma
-                var platform2 = new Phaser.Physics.Box2D.Body(this.game, null, 0, 0, 2);
-                platform2.setRectangle(100, 20, 0, 0, 0);
-                
-                // this.game.physics.box2d.enable(platform2);
+                var platform2:Car.Platform = new GameBase.Car.Platform(this.game, this)
+                platform2.build(-this.direction, platform.base);
 
-                // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
-                // this.game.physics.box2d.prismaticJoint(this.base.body, platform2, 0, -1, 0, -20, 0, 0, 1500, 200, true, 0, 50, true);
-                
-
-                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-                var platformJoin = this.game.physics.box2d.weldJoint(this.base.body, platform2, 0, -30, 20 * this.direction, 20, 3, 0.3);
-                // console.log('platformJoin:', platformJoin)
-                // this.game.physics.box2d.world.DestroyJoint(platformJoin);
+                var platform3:Car.Platform = new GameBase.Car.Platform(this.game, this)
+                platform3.build(this.direction, platform2.base);
 
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
@@ -91,31 +84,10 @@ module GameBase
                     //
 
                     setTimeout(()=>{
-                        if(!platformJoin)
-                            return;
-                        //
-
-                        console.log('DestroyJoint >>> ')
-                        this.game.physics.box2d.world.DestroyJoint(platformJoin);
-                        platformJoin = null;
-
-                        if(platform2)
-                        {
-                            platform2.applyForce(300*-this.direction, -600)
-                            platform2.rotation = 10;
-                            setTimeout(()=>{
-                                platform2.destroy();
-                            }, 3000)
-                        }
-                        
+                        // console.log('DestroyJoint >>> ')
+                        // platform.kill();
                     }, 100)
                     
-
-                    
-                    // console.log('this.game.physics.box2d.world>>', this.game.physics.box2d.world)
-
-                    // platformJoin.IsActive(false);
-
                     var advCar:Car.Car = <Car.Car>body2.element;
 
                     this.event.dispatch(GameBase.Car.E.CarEvent.OnHit, advCar);
