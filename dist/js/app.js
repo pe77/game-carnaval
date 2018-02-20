@@ -968,6 +968,9 @@ var GameBase;
                 _this.damage = [1, 6];
                 _this.driveJoints = [];
                 _this.name = '-nome padrão-';
+                // plataformas
+                _this.platforms = [];
+                _this.partyBoys = [];
                 return _this;
             }
             Car.prototype.build = function (position, direction) {
@@ -996,12 +999,28 @@ var GameBase;
                 wheelBodies[1].setCircle(0.4 * PTM);
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
                 this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1], 1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // front
+                // add plataformas
                 var platform = new GameBase.Car.Platform(this.game, this);
                 platform.build(this.direction, this.base.body);
+                this.platforms.push(platform);
                 var platform2 = new GameBase.Car.Platform(this.game, this);
                 platform2.build(-this.direction, platform.base);
+                this.platforms.push(platform2);
                 var platform3 = new GameBase.Car.Platform(this.game, this);
                 platform3.build(this.direction, platform2.base);
+                this.platforms.push(platform3);
+                // add foliões
+                var total = 6;
+                for (var i in this.platforms) {
+                    var partyBoys = [];
+                    for (var j = 0; j < total; j++) {
+                        var pb = new GameBase.PartyBoy.PartyBoy(this.game);
+                        pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+                        partyBoys.push(pb);
+                        this.partyBoys.push(pb);
+                    }
+                    this.platforms[i].setPartyBoys(partyBoys);
+                }
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
                 this.base.body.element = this;
@@ -1043,6 +1062,11 @@ var GameBase;
                 iconUp.x = this.base.body.x - this.base.width / 2;
                 iconUp.y = this.base.body.y - 50;
                 iconUp.go();
+                // mata um partyboy, se houver
+                if (this.partyBoys.length) {
+                    var pb = this.partyBoys.pop();
+                    pb.kill();
+                }
                 return damage;
             };
             Car.prototype.update = function () {
@@ -1075,6 +1099,7 @@ var GameBase;
                 _this.size = 100;
                 _this.direction = 1;
                 _this.death = false;
+                _this.partyBoys = [];
                 _this.car = car; // referencia do carro... vai que precisa
                 return _this;
             }
@@ -1088,7 +1113,7 @@ var GameBase;
                 this.base.x = body.x; //direction == 1 ? 100 : 600;
                 // this.base.x = body.y - 200;
                 var partyBoys = [];
-                console.log('body position', body.x, body.y);
+                // console.log('body position', body.x, body.y);
                 // var platform2:box2d.b2Fixture = this.base.addRectangle(this.size, 10, 0, -50, 0);
                 // this.base.addRectangle(this.size, 10, 0, -100, 0);
                 // var platform2:Phaser.Physics.Box2D.Body = new Phaser.Physics.Box2D.Body(this.game, null, 200, 200, 2);
@@ -1128,23 +1153,32 @@ var GameBase;
                     25,
                     50
                 ];
-                for (var i = 0; i < 5; i++) {
-                    var partyBoy = this.game.add.sprite(body.x, 10, 'partyboy-' + this.game.rnd.integerInRange(1, 6));
-                    this.game.physics.box2d.enable(partyBoy);
-                    partyBoy.body.sensor = true;
-                    partyBoy.body.mass = 0.1;
-                    // this.base.fixedRotation =  true;
-                    partyBoys.push(partyBoy);
-                    var posX = positions[i];
-                    console.log('posX:', posX);
-                    this.joint = this.game.physics.box2d.weldJoint(this.base, partyBoy.body, posX, -(partyBoy.height / 2), 0, partyBoy.height / 2, 3, 0.3);
+                /*
+                var total:number = 8;
+                for(var i = 0; i < total; i++)
+                {
+                    var posX:number = -(this.size / 2) + ((this.size / (total-1)) * i) ;
+                    
+                    var partyboy:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
+                    partyboy.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+                    partyboy.build(posX, this.base);
+                    
                 }
+                */
                 this.base.fixedRotation = true;
                 setTimeout(function () {
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
                     _this.base.fixedRotation = false;
                 }, 500);
                 // return this.joint; // retorna o vinculo
+            };
+            Platform.prototype.setPartyBoys = function (partyBoys) {
+                this.partyBoys = partyBoys;
+                var total = this.partyBoys.length;
+                for (var i = 0; i < total; i++) {
+                    var posX = -(this.size / 2) + ((this.size / (total - 1)) * i);
+                    this.partyBoys[i].build(posX, this.base);
+                }
             };
             Platform.prototype.kill = function () {
                 var _this = this;
@@ -1199,6 +1233,57 @@ var GameBase;
         }(Pk.PkElement));
         Icon_1.Icon = Icon;
     })(Icon = GameBase.Icon || (GameBase.Icon = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var PartyBoy;
+    (function (PartyBoy_1) {
+        var PartyBoy = (function (_super) {
+            __extends(PartyBoy, _super);
+            function PartyBoy(game) {
+                var _this = _super.call(this, game) || this;
+                _this.spriteKey = 'partyboy-1';
+                _this.death = false;
+                return _this;
+            }
+            PartyBoy.prototype.build = function (position, platformBody) {
+                this.base = this.game.add.sprite(platformBody.x, 10, this.spriteKey);
+                this.game.physics.box2d.enable(this.base);
+                this.body = this.base.body;
+                this.body.sensor = true;
+                this.body.mass = 0.1;
+                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height / 2), 0, this.base.height / 2, 3, 0.3);
+            };
+            PartyBoy.prototype.kill = function () {
+                var _this = this;
+                // se já matou.. não mata
+                if (this.death)
+                    return;
+                //
+                this.death = true; // salva que já matou
+                // remove o vinculo
+                this.game.physics.box2d.world.DestroyJoint(this.joint);
+                // chuta uma direção
+                var direction = 1;
+                if (this.game.rnd.integerInRange(0, 1))
+                    direction = -1;
+                //
+                // joga pra cima
+                // this.base.body.applyForce(2 * direction, -100)
+                // this.base.body.rotation = 90;
+                setTimeout(function () {
+                    _this.game.physics.box2d.world.DestroyJoint(_this.joint); // remove do carro
+                    _this.base.body.applyForce(20 * direction, -30);
+                }, 100);
+                setTimeout(function () {
+                    _this.base.destroy(); // mata de vez
+                }, 10000);
+                console.log('kill folião [', this.getId(), ']');
+            };
+            return PartyBoy;
+        }(Pk.PkElement));
+        PartyBoy_1.PartyBoy = PartyBoy;
+    })(PartyBoy = GameBase.PartyBoy || (GameBase.PartyBoy = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {

@@ -16,6 +16,8 @@ module GameBase
 
             death:boolean = false;
 
+            partyBoys:Array<PartyBoy.PartyBoy> = [];
+
             constructor(game:Pk.PkGame, car:Car.Car)
             {
                 super(game);
@@ -38,7 +40,7 @@ module GameBase
 
                 
 
-                console.log('body position', body.x, body.y);
+                // console.log('body position', body.x, body.y);
 
                 // var platform2:box2d.b2Fixture = this.base.addRectangle(this.size, 10, 0, -50, 0);
                 // this.base.addRectangle(this.size, 10, 0, -100, 0);
@@ -84,21 +86,19 @@ module GameBase
                     25,
                     50
                 ];
-                for(var i = 0; i < 5; i++)
+
+                /*
+                var total:number = 8;
+                for(var i = 0; i < total; i++)
                 {
-                    var partyBoy:Phaser.Sprite = this.game.add.sprite(body.x, 10, 'partyboy-' + this.game.rnd.integerInRange(1, 6));
-                    this.game.physics.box2d.enable(partyBoy);
+                    var posX:number = -(this.size / 2) + ((this.size / (total-1)) * i) ;
                     
-                    partyBoy.body.sensor = true;
-                    partyBoy.body.mass = 0.1;
-                    // this.base.fixedRotation =  true;
-                    partyBoys.push(partyBoy);
-
-                    var posX:number = positions[i];
-                    console.log('posX:', posX);
-
-                    this.joint = this.game.physics.box2d.weldJoint(this.base, partyBoy.body, posX, -(partyBoy.height / 2), 0, partyBoy.height / 2, 3, 0.3);
+                    var partyboy:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
+                    partyboy.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+                    partyboy.build(posX, this.base);
+                    
                 }
+                */
 
                 this.base.fixedRotation = true;
                 setTimeout(()=>{
@@ -107,6 +107,19 @@ module GameBase
                 }, 500)
 
                 // return this.joint; // retorna o vinculo
+            }
+
+            setPartyBoys(partyBoys:Array<PartyBoy.PartyBoy>)
+            {
+                this.partyBoys = partyBoys;
+                var total:number = this.partyBoys.length;
+                for(var i = 0; i < total; i++)
+                {
+                    var posX:number = -(this.size / 2) + ((this.size / (total-1)) * i) ;
+                    
+                    this.partyBoys[i].build(posX, this.base);
+                    
+                }
             }
 
             kill()

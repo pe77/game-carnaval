@@ -24,6 +24,11 @@ module GameBase
 
             name:string = '-nome padrão-';
 
+            // plataformas
+            platforms:Array<Car.Platform> = [];
+
+            partyBoys:Array<PartyBoy.PartyBoy> = [];
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -64,14 +69,37 @@ module GameBase
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1*PTM, this.rideHeight*PTM, 0,0, 0,1, this.frequency, this.damping, 0, this.motorTorque, true ); // rear
 	            this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1],  1*PTM, this.rideHeight*PTM, 0,0, 0,1, this.frequency, this.damping, 0, this.motorTorque, true ); // front
 
+
+
+                // add plataformas
                 var platform:Car.Platform = new GameBase.Car.Platform(this.game, this)
                 platform.build(this.direction, this.base.body);
+                this.platforms.push(platform);
 
                 var platform2:Car.Platform = new GameBase.Car.Platform(this.game, this)
                 platform2.build(-this.direction, platform.base);
+                this.platforms.push(platform2);
 
                 var platform3:Car.Platform = new GameBase.Car.Platform(this.game, this)
                 platform3.build(this.direction, platform2.base);
+                this.platforms.push(platform3);
+
+                // add foliões
+                var total:number = 6;
+                for(var i in this.platforms)
+                {
+                    var partyBoys:Array<PartyBoy.PartyBoy> = [];
+                    for (var j = 0; j < total; j++) 
+                    {
+                        var pb:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
+                        pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+                        partyBoys.push(pb);
+                        this.partyBoys.push(pb);
+                    }
+
+                    this.platforms[i].setPartyBoys(partyBoys);
+                }
+                
 
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
@@ -137,6 +165,14 @@ module GameBase
                 iconUp.y = this.base.body.y - 50;
 
                 iconUp.go();
+
+                // mata um partyboy, se houver
+                if(this.partyBoys.length)
+                {
+                    var pb:PartyBoy.PartyBoy = this.partyBoys.pop();
+                    pb.kill();
+                }
+                
 
                 return damage;
             }
