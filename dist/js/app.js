@@ -611,6 +611,9 @@ var GameBase;
             // intro
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
+            for (var i = 0; i < 6; i++)
+                this.load.image('partyboy-' + (i + 1), 'assets/default/car/f' + (i + 1) + '.png');
+            //
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
@@ -938,7 +941,7 @@ var GameBase;
                 var forceY = -750 - (300 * damage);
                 carB.base.body.applyForce(forceX * carA.direction, forceY);
                 // uma base força aplicada em si mesmo
-                carA.base.body.applyForce(200 * -carA.direction, 200 / 2);
+                carA.base.body.applyForce(300 * -carA.direction, 300 / 2);
                 // balança a camera
                 this.game.camera.shake(0.01, 100);
             };
@@ -958,7 +961,7 @@ var GameBase;
                 _this.size = 50;
                 _this.frequency = 3.5;
                 _this.damping = 0.5;
-                _this.motorTorque = 2;
+                _this.motorTorque = 3;
                 _this.motorSpeed = 50;
                 _this.rideHeight = 0.5;
                 _this.direction = 1;
@@ -982,8 +985,8 @@ var GameBase;
                 this.sensor.SetSensor(true);
                 var PTM = this.size;
                 // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
-                var tireSprite1 = this.game.add.sprite(0, 0, 'car-1-tire');
-                var tireSprite2 = this.game.add.sprite(0, 0, 'car-1-tire');
+                var tireSprite1 = this.game.add.sprite(0, 500, 'car-1-tire');
+                var tireSprite2 = this.game.add.sprite(0, 500, 'car-1-tire');
                 this.game.physics.box2d.enable(tireSprite1);
                 this.game.physics.box2d.enable(tireSprite2);
                 var wheelBodies = [];
@@ -1076,6 +1079,7 @@ var GameBase;
                 return _this;
             }
             Platform.prototype.build = function (direction, body) {
+                var _this = this;
                 // salva a direção
                 this.direction = direction;
                 // cria a plataforma
@@ -1083,6 +1087,7 @@ var GameBase;
                 this.base.setRectangle(this.size, 10, 0, 0, 0);
                 this.base.x = body.x; //direction == 1 ? 100 : 600;
                 // this.base.x = body.y - 200;
+                var partyBoys = [];
                 console.log('body position', body.x, body.y);
                 // var platform2:box2d.b2Fixture = this.base.addRectangle(this.size, 10, 0, -50, 0);
                 // this.base.addRectangle(this.size, 10, 0, -100, 0);
@@ -1114,10 +1119,31 @@ var GameBase;
                     this.game.physics.box2d.weldJoint(platform2, platform3, 0, 0, 40 * direction, 80, 5, 0.0);
                 }, 1000);
                 */
+                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
+                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 8, 0.5);
+                var positions = [
+                    -50,
+                    -25,
+                    0,
+                    25,
+                    50
+                ];
+                for (var i = 0; i < 5; i++) {
+                    var partyBoy = this.game.add.sprite(body.x, 10, 'partyboy-' + this.game.rnd.integerInRange(1, 6));
+                    this.game.physics.box2d.enable(partyBoy);
+                    partyBoy.body.sensor = true;
+                    partyBoy.body.mass = 0.1;
+                    // this.base.fixedRotation =  true;
+                    partyBoys.push(partyBoy);
+                    var posX = positions[i];
+                    console.log('posX:', posX);
+                    this.joint = this.game.physics.box2d.weldJoint(this.base, partyBoy.body, posX, -(partyBoy.height / 2), 0, partyBoy.height / 2, 3, 0.3);
+                }
+                this.base.fixedRotation = true;
                 setTimeout(function () {
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
-                }, 100);
-                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 5, 0.0);
+                    _this.base.fixedRotation = false;
+                }, 500);
                 // return this.joint; // retorna o vinculo
             };
             Platform.prototype.kill = function () {

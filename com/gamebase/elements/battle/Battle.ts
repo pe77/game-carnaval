@@ -59,7 +59,7 @@ module GameBase
                 carB.base.body.applyForce(forceX*carA.direction, forceY);
 
                 // uma base força aplicada em si mesmo
-                carA.base.body.applyForce(200*-carA.direction, 200/2);
+                carA.base.body.applyForce(300*-carA.direction, 300/2);
 
                 
 

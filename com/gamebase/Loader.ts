@@ -76,6 +76,12 @@ module GameBase {
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
 
+            for (var i = 0; i < 6; i++)
+                this.load.image('partyboy-' + (i+1), 'assets/default/car/f'+(i+1)+'.png');    
+            //
+
+            
+
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');
             

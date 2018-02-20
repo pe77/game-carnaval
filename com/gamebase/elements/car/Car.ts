@@ -10,7 +10,7 @@ module GameBase
             
             frequency:number = 3.5;
             damping:number = 0.5;	
-            motorTorque:number = 2;
+            motorTorque:number = 3;
             motorSpeed:number = 50;
             rideHeight:number = 0.5;
             direction:number = 1;
@@ -49,8 +49,8 @@ module GameBase
                 var PTM = this.size;
 
                 // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
-                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 0, 'car-1-tire');
-                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 0, 'car-1-tire');
+                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 500, 'car-1-tire');
+                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 500, 'car-1-tire');
 
                 this.game.physics.box2d.enable(tireSprite1);
                 this.game.physics.box2d.enable(tireSprite2);
@@ -143,7 +143,6 @@ module GameBase
 
             update()
             {
-                    
                     for (var i = 0; i < 2; i++) {
                         this.driveJoints[i].EnableMotor(true);
                         this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);

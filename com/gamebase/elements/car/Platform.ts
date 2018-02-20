@@ -33,6 +33,9 @@ module GameBase
 
                 this.base.x = body.x;//direction == 1 ? 100 : 600;
                 // this.base.x = body.y - 200;
+
+                var partyBoys:Array<Phaser.Sprite> = [];
+
                 
 
                 console.log('body position', body.x, body.y);
@@ -69,11 +72,39 @@ module GameBase
                 }, 1000);
                 */
 
+                
+
+                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
+                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 8, 0.5);
+                
+                var positions:Array<number> = [
+                    -50,
+                    -25,
+                    0,
+                    25,
+                    50
+                ];
+                for(var i = 0; i < 5; i++)
+                {
+                    var partyBoy:Phaser.Sprite = this.game.add.sprite(body.x, 10, 'partyboy-' + this.game.rnd.integerInRange(1, 6));
+                    this.game.physics.box2d.enable(partyBoy);
+                    
+                    partyBoy.body.sensor = true;
+                    partyBoy.body.mass = 0.1;
+                    // this.base.fixedRotation =  true;
+                    partyBoys.push(partyBoy);
+
+                    var posX:number = positions[i];
+                    console.log('posX:', posX);
+
+                    this.joint = this.game.physics.box2d.weldJoint(this.base, partyBoy.body, posX, -(partyBoy.height / 2), 0, partyBoy.height / 2, 3, 0.3);
+                }
+
+                this.base.fixedRotation = true;
                 setTimeout(()=>{
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
-                }, 100)
-                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 5, 0.0);
-                
+                    this.base.fixedRotation = false;
+                }, 500)
 
                 // return this.joint; // retorna o vinculo
             }
