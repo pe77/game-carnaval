@@ -84,6 +84,8 @@ module GameBase {
 
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');
+            this.load.image('car-1-body', 'assets/default/car/body.png');
+            this.load.image('car-1-platform', 'assets/default/car/platform.png');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

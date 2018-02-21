@@ -616,6 +616,8 @@ var GameBase;
             //
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');
+            this.load.image('car-1-body', 'assets/default/car/body.png');
+            this.load.image('car-1-platform', 'assets/default/car/platform.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -963,7 +965,7 @@ var GameBase;
                 _this.damping = 0.5;
                 _this.motorTorque = 3;
                 _this.motorSpeed = 50;
-                _this.rideHeight = 0.5;
+                _this.rideHeight = 0.8;
                 _this.direction = 1;
                 _this.damage = [1, 6];
                 _this.driveJoints = [];
@@ -979,6 +981,9 @@ var GameBase;
                 if (direction === void 0) { direction = 1; }
                 this.direction = direction;
                 this.base = new Phaser.Sprite(this.game, 0, 0);
+                this.bodySprite = this.game.add.sprite(0, 0, 'car-1-body');
+                this.bodySprite.scale.x *= -this.direction;
+                this.bodySprite.anchor.set(.5, .5);
                 this.game.physics.box2d.enable(this.base);
                 this.base.body.setCircle(20);
                 this.base.body.x = position.x;
@@ -1036,9 +1041,13 @@ var GameBase;
                     _this.event.dispatch(GameBase.Car.E.CarEvent.OnHit, advCar);
                 }, this);
                 // drag
-                this.game.input.onDown.add(this.mouseDragStart, this);
-                this.game.input.addMoveCallback(this.mouseDragMove, this);
-                this.game.input.onUp.add(this.mouseDragEnd, this);
+                // this.game.input.onDown.add(this.mouseDragStart, this);
+                // this.game.input.addMoveCallback(this.mouseDragMove, this);
+                // this.game.input.onUp.add(this.mouseDragEnd, this);
+                for (var i_1 = 0; i_1 < 2; i_1++) {
+                    this.driveJoints[i_1].EnableMotor(true);
+                    this.driveJoints[i_1].SetMotorSpeed(this.motorSpeed * this.direction);
+                }
             };
             Car.prototype.mouseDragStart = function () {
                 this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
@@ -1070,10 +1079,9 @@ var GameBase;
                 return damage;
             };
             Car.prototype.update = function () {
-                for (var i = 0; i < 2; i++) {
-                    this.driveJoints[i].EnableMotor(true);
-                    this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);
-                }
+                // console.log('update', this.base.body.x, this.base.body.y)
+                this.bodySprite.x = this.base.body.x;
+                this.bodySprite.y = this.base.body.y;
             };
             return Car;
         }(Pk.PkElement));
@@ -1107,68 +1115,17 @@ var GameBase;
                 var _this = this;
                 // salva a direção
                 this.direction = direction;
-                // cria a plataforma
-                this.base = new Phaser.Physics.Box2D.Body(this.game, null, 0, 0, 2);
-                this.base.setRectangle(this.size, 10, 0, 0, 0);
-                this.base.x = body.x; //direction == 1 ? 100 : 600;
-                // this.base.x = body.y - 200;
-                var partyBoys = [];
-                // console.log('body position', body.x, body.y);
-                // var platform2:box2d.b2Fixture = this.base.addRectangle(this.size, 10, 0, -50, 0);
-                // this.base.addRectangle(this.size, 10, 0, -100, 0);
-                // var platform2:Phaser.Physics.Box2D.Body = new Phaser.Physics.Box2D.Body(this.game, null, 200, 200, 2);
-                // platform2.
-                /*
-                var platform2 = new Phaser.Sprite(this.game, body.x, 0);
-                this.game.physics.box2d.enable(platform2);
-                platform2.body.setRectangle(this.size, 10, 0, 0, 0);
-
-
-                var platform3 = new Phaser.Sprite(this.game, body.x, 0);
-                this.game.physics.box2d.enable(platform3);
-                platform3.body.setRectangle(this.size, 10, 0, 0, 0);
-                
-                
-                // direction = 1;
-                // cria o vinculo
+                this.base = this.game.add.sprite(0, 0, 'car-1-platform');
+                this.base.scale.x *= -this.direction;
+                this.base.anchor.set(.5, .5);
+                this.game.physics.box2d.enable(this.base);
+                this.base.body.setRectangle(this.size, 10, 0, 0, 0);
                 // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-
-                setTimeout(()=>{
-                    // platform2.SetRestitution(3);
-                    // platform2.Destroy()
-                    console.log('foiii')
-                    // this.base.removeFixture(platform2);
-                    // this.base.clearFixtures()
-                    this.game.physics.box2d.weldJoint(this.base, platform2, 0, 0, 40 * -direction, 80, 5, 0.0);
-
-                    this.game.physics.box2d.weldJoint(platform2, platform3, 0, 0, 40 * direction, 80, 5, 0.0);
-                }, 1000);
-                */
-                // bodyA, bodyB, ax, ay, bx, by, frequency, damping
-                this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, 0, 40 * direction, 80, 8, 0.5);
-                var positions = [
-                    -50,
-                    -25,
-                    0,
-                    25,
-                    50
-                ];
-                /*
-                var total:number = 8;
-                for(var i = 0; i < total; i++)
-                {
-                    var posX:number = -(this.size / 2) + ((this.size / (total-1)) * i) ;
-                    
-                    var partyboy:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
-                    partyboy.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
-                    partyboy.build(posX, this.base);
-                    
-                }
-                */
-                this.base.fixedRotation = true;
+                this.joint = this.game.physics.box2d.weldJoint(body, this.base.body, 0, 0, 40 * direction, 80, 8, 0.5);
+                this.base.body.fixedRotation = true;
                 setTimeout(function () {
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
-                    _this.base.fixedRotation = false;
+                    _this.base.body.fixedRotation = false;
                 }, 500);
                 // return this.joint; // retorna o vinculo
             };
@@ -1177,7 +1134,7 @@ var GameBase;
                 var total = this.partyBoys.length;
                 for (var i = 0; i < total; i++) {
                     var posX = -(this.size / 2) + ((this.size / (total - 1)) * i);
-                    this.partyBoys[i].build(posX, this.base);
+                    this.partyBoys[i].build(posX, this.base.body);
                 }
             };
             Platform.prototype.kill = function () {
@@ -1195,6 +1152,10 @@ var GameBase;
                 setTimeout(function () {
                     _this.base.destroy(); // mata de vez
                 }, 3000);
+            };
+            Platform.prototype.update = function () {
+                // this.bodySprite.x = this.base.x;
+                // this.bodySprite.y = this.base.y;
             };
             return Platform;
         }(Pk.PkElement));
@@ -1420,7 +1381,7 @@ var GameBase;
             // play music
         };
         Main.prototype.render = function () {
-            this.game.debug.box2dWorld();
+            // this.game.debug.box2dWorld();
             this.game.debug.text('Main Screen', this.game.world.centerX, 35);
         };
         // calls when leaving state

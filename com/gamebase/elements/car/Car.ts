@@ -12,7 +12,7 @@ module GameBase
             damping:number = 0.5;	
             motorTorque:number = 3;
             motorSpeed:number = 50;
-            rideHeight:number = 0.5;
+            rideHeight:number = 0.8;
             direction:number = 1;
 
             damage:[number, number] = [1, 6];
@@ -29,6 +29,9 @@ module GameBase
 
             partyBoys:Array<PartyBoy.PartyBoy> = [];
 
+
+            bodySprite:Phaser.Sprite;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -40,8 +43,13 @@ module GameBase
 
                 this.base = new Phaser.Sprite(this.game, 0, 0);
 
+                this.bodySprite = this.game.add.sprite(0, 0, 'car-1-body');
+                this.bodySprite.scale.x *= -this.direction;
+                this.bodySprite.anchor.set(.5, .5);
+                
                 this.game.physics.box2d.enable(this.base);
                 this.base.body.setCircle(20);
+                
 
                 this.base.body.x = position.x;
                 this.base.body.y = position.y;
@@ -50,6 +58,8 @@ module GameBase
 
                 this.sensor = this.base.body.addRectangle(this.size * 3, this.size, 0, this.size / 2 - this.size / 2);
                 this.sensor.SetSensor(true);
+                
+                
                 
                 var PTM = this.size;
 
@@ -122,9 +132,15 @@ module GameBase
                 }, this);
 
                 // drag
-                this.game.input.onDown.add(this.mouseDragStart, this);
-                this.game.input.addMoveCallback(this.mouseDragMove, this);
-                this.game.input.onUp.add(this.mouseDragEnd, this);
+                // this.game.input.onDown.add(this.mouseDragStart, this);
+                // this.game.input.addMoveCallback(this.mouseDragMove, this);
+                // this.game.input.onUp.add(this.mouseDragEnd, this);
+
+
+                for (let i = 0; i < 2; i++) {
+                    this.driveJoints[i].EnableMotor(true);
+                    this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);
+                }
 
                 
             }
@@ -179,10 +195,11 @@ module GameBase
 
             update()
             {
-                    for (var i = 0; i < 2; i++) {
-                        this.driveJoints[i].EnableMotor(true);
-                        this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);
-                    }
+                    
+                // console.log('update', this.base.body.x, this.base.body.y)
+
+                this.bodySprite.x = this.base.body.x;
+                this.bodySprite.y = this.base.body.y;
             }
         }
 
