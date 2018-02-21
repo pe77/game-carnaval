@@ -39,7 +39,7 @@ module GameBase {
             this.loaderState = Loader;
 
             // this.canvasSize = ["100%", 720];
-            this.canvasSize = [800, 600];
+            this.canvasSize = [1024, 768];
 
 
             this.initialState = 'Main';

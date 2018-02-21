@@ -475,7 +475,7 @@ var GameBase;
             // loading all* game assets
             _this.loaderState = GameBase.Loader;
             // this.canvasSize = ["100%", 720];
-            _this.canvasSize = [800, 600];
+            _this.canvasSize = [1024, 768];
             _this.initialState = 'Main';
             return _this;
         }
