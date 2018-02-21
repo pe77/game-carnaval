@@ -1,9 +1,9 @@
-# Saci Night Fever
-Jogo para Jogabilijam Vol.2
+# Jogo de Carnaval
+Jogo para Jogabilijam Vol.3
 
 
-git clone --recursive -v "https://github.com/pe77/game-sacinightfever" 
+git clone --recursive -v "https://github.com/pe77/game-carnaval" 
 
 Online:
 
-http://162.243.169.239/games/saci/
+http://162.243.169.239/games/carnaval/
