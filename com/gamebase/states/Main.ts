@@ -66,6 +66,7 @@ module GameBase
 			// this.game.debug.box2dWorld();
 			
             this.game.debug.text('Main Screen', this.game.world.centerX, 35);
+			
         }
 		
 		

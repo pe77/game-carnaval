@@ -7,8 +7,9 @@ module GameBase
             car:Car.Car
 
             base:Phaser.Sprite;
-            // base:Phaser.Physics.Box2D.Body;
+            
             joint:any;
+            jointBody:Phaser.Physics.Box2D.Body;
 
             size:number = 100;
 
@@ -19,6 +20,11 @@ module GameBase
             partyBoys:Array<PartyBoy.PartyBoy> = [];
 
             bodySprite:Phaser.Sprite;
+
+            line:Phaser.Line;
+
+            lineSprite:Phaser.Sprite;
+            lineGraph:Phaser.Graphics;
 
             constructor(game:Pk.PkGame, car:Car.Car)
             {
@@ -48,7 +54,33 @@ module GameBase
                     this.base.body.fixedRotation = false;
                 }, 500)
 
+                // console.log(this.joint)
+
+                this.jointBody = body;
+
+                
+
                 // return this.joint; // retorna o vinculo
+                if(this.car.name == 'Carro 1' || true)
+                {
+                    console.log('plat id: ', this.getId());
+
+
+                    // var line = new Phaser.Line(0, 0, 100, 100);
+                    this.lineGraph = this.game.add.graphics(0,0);
+                    
+                    // this.lineGraph.beginFill();
+                    // this.lineGraph.lineStyle(10, 0xffd900, 1);
+                    // this.lineGraph.moveTo(this.line.start.x, this.line.start.y);//moving position of graphic if you draw mulitple lines
+                    // this.lineGraph.lineTo(this.line.end.y, this.line.end.y);
+                    // this.lineGraph.endFill();
+                    
+
+                    // this.lineSprite = this.game.add.sprite(0, 0, graphics);
+                    
+                    
+                }
+                
             }
 
             setPartyBoys(partyBoys:Array<PartyBoy.PartyBoy>)
@@ -77,8 +109,7 @@ module GameBase
                 this.game.physics.box2d.world.DestroyJoint(this.joint);
 
                 // joga pra cima
-                this.base.applyForce(300*-this.direction, -400)
-                this.base.rotation = 90;
+                this.base.body.applyForce(300*-this.direction, -400)
 
                 setTimeout(()=>{
                     this.base.destroy(); // mata de vez
@@ -87,8 +118,44 @@ module GameBase
 
             update()
             {
+                
+                if(this.getId() == 7 || true)
+                {
+                    // this.line.fromSprite(this.base.body, this.jointBody, false);
+                    
+                    
+                    // this.lineSprite.angle = this.line.angle;
+                    // this.lineGraph.rotation = this.line.angle;
+
+                    // this.line.start.y = this.line.start.x = 100;
+                    // this.line.end.y = this.line.end.x = 600;
+
+                    this.lineGraph.clear();
+                    this.lineGraph.lineStyle(4, 0x383a51, 1);
+                    this.lineGraph.moveTo(this.base.body.x, this.base.body.y);//moving position of graphic if you draw mulitple lines
+                    this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
+                    this.lineGraph.update();
+
+
+                    // this.lineGraph.angle = this.line.angle;
+
+                    console.log('joint', this.joint)
+
+                    this.base.bringToTop();
+
+                }
                 // this.bodySprite.x = this.base.x;
                 // this.bodySprite.y = this.base.y;
+                
+                // this.line.fromSprite(this.base.body, this.jointBody, false);
+
+                // console.log('line:', this.line.angle)
+            }
+
+            render()
+            {
+                console.log('render')
+                this.game.debug.geom(this.line);
             }
 
         }

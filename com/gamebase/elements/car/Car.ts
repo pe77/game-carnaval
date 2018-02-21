@@ -200,6 +200,8 @@ module GameBase
 
                 this.bodySprite.x = this.base.body.x;
                 this.bodySprite.y = this.base.body.y;
+
+                this.bodySprite.bringToTop();
             }
         }
 

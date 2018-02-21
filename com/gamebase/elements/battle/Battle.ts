@@ -33,6 +33,8 @@ module GameBase
                 this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
                 this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
 
+                this.cars[0].name = 'carro 1';
+
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, (e, otherPlayer:Car.Car)=>{
                     // console.log('carro 1 bateu');

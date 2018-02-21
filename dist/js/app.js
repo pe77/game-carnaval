@@ -925,6 +925,7 @@ var GameBase;
                 // cria / posiciona
                 this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
                 this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
+                this.cars[0].name = 'carro 1';
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
                     // console.log('carro 1 bateu');
@@ -1082,6 +1083,7 @@ var GameBase;
                 // console.log('update', this.base.body.x, this.base.body.y)
                 this.bodySprite.x = this.base.body.x;
                 this.bodySprite.y = this.base.body.y;
+                this.bodySprite.bringToTop();
             };
             return Car;
         }(Pk.PkElement));
@@ -1127,7 +1129,20 @@ var GameBase;
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
                     _this.base.body.fixedRotation = false;
                 }, 500);
+                // console.log(this.joint)
+                this.jointBody = body;
                 // return this.joint; // retorna o vinculo
+                if (this.car.name == 'Carro 1' || true) {
+                    console.log('plat id: ', this.getId());
+                    // var line = new Phaser.Line(0, 0, 100, 100);
+                    this.lineGraph = this.game.add.graphics(0, 0);
+                    // this.lineGraph.beginFill();
+                    // this.lineGraph.lineStyle(10, 0xffd900, 1);
+                    // this.lineGraph.moveTo(this.line.start.x, this.line.start.y);//moving position of graphic if you draw mulitple lines
+                    // this.lineGraph.lineTo(this.line.end.y, this.line.end.y);
+                    // this.lineGraph.endFill();
+                    // this.lineSprite = this.game.add.sprite(0, 0, graphics);
+                }
             };
             Platform.prototype.setPartyBoys = function (partyBoys) {
                 this.partyBoys = partyBoys;
@@ -1147,15 +1162,35 @@ var GameBase;
                 // remove o vinculo
                 this.game.physics.box2d.world.DestroyJoint(this.joint);
                 // joga pra cima
-                this.base.applyForce(300 * -this.direction, -400);
-                this.base.rotation = 90;
+                this.base.body.applyForce(300 * -this.direction, -400);
                 setTimeout(function () {
                     _this.base.destroy(); // mata de vez
                 }, 3000);
             };
             Platform.prototype.update = function () {
+                if (this.getId() == 7 || true) {
+                    // this.line.fromSprite(this.base.body, this.jointBody, false);
+                    // this.lineSprite.angle = this.line.angle;
+                    // this.lineGraph.rotation = this.line.angle;
+                    // this.line.start.y = this.line.start.x = 100;
+                    // this.line.end.y = this.line.end.x = 600;
+                    this.lineGraph.clear();
+                    this.lineGraph.lineStyle(4, 0x383a51, 1);
+                    this.lineGraph.moveTo(this.base.body.x, this.base.body.y); //moving position of graphic if you draw mulitple lines
+                    this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
+                    this.lineGraph.update();
+                    // this.lineGraph.angle = this.line.angle;
+                    console.log('joint', this.joint);
+                    this.base.bringToTop();
+                }
                 // this.bodySprite.x = this.base.x;
                 // this.bodySprite.y = this.base.y;
+                // this.line.fromSprite(this.base.body, this.jointBody, false);
+                // console.log('line:', this.line.angle)
+            };
+            Platform.prototype.render = function () {
+                console.log('render');
+                this.game.debug.geom(this.line);
             };
             return Platform;
         }(Pk.PkElement));
