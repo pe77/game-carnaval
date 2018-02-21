@@ -139,8 +139,6 @@ module GameBase
 
                     // this.lineGraph.angle = this.line.angle;
 
-                    console.log('joint', this.joint)
-
                     this.base.bringToTop();
 
                 }
@@ -152,11 +150,6 @@ module GameBase
                 // console.log('line:', this.line.angle)
             }
 
-            render()
-            {
-                console.log('render')
-                this.game.debug.geom(this.line);
-            }
 
         }
     }

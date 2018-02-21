@@ -1180,17 +1180,12 @@ var GameBase;
                     this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
                     this.lineGraph.update();
                     // this.lineGraph.angle = this.line.angle;
-                    console.log('joint', this.joint);
                     this.base.bringToTop();
                 }
                 // this.bodySprite.x = this.base.x;
                 // this.bodySprite.y = this.base.y;
                 // this.line.fromSprite(this.base.body, this.jointBody, false);
                 // console.log('line:', this.line.angle)
-            };
-            Platform.prototype.render = function () {
-                console.log('render');
-                this.game.debug.geom(this.line);
             };
             return Platform;
         }(Pk.PkElement));
