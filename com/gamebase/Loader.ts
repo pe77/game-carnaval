@@ -80,7 +80,10 @@ module GameBase {
                 this.load.image('partyboy-' + (i+1), 'assets/default/car/f'+(i+1)+'.png');    
             //
 
-            
+            // gaude
+            this.load.image('gaude-bg', 'assets/default/gaude/gaude-bg.png');
+            this.load.image('gaude-mark', 'assets/default/gaude/gaude-mark.png');
+            this.load.image('gaude-button', 'assets/default/gaude/gaude-button.png');
 
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');

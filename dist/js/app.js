@@ -614,6 +614,10 @@ var GameBase;
             for (var i = 0; i < 6; i++)
                 this.load.image('partyboy-' + (i + 1), 'assets/default/car/f' + (i + 1) + '.png');
             //
+            // gaude
+            this.load.image('gaude-bg', 'assets/default/gaude/gaude-bg.png');
+            this.load.image('gaude-mark', 'assets/default/gaude/gaude-mark.png');
+            this.load.image('gaude-button', 'assets/default/gaude/gaude-button.png');
             // car parts
             this.load.image('car-1-tire', 'assets/default/car/tire.png');
             this.load.image('car-1-body', 'assets/default/car/body.png');
@@ -654,7 +658,7 @@ var GameBase;
                 this.sfxEndGameLose = this.game.add.sound('sfx-endgame-lose');
                 // eventos
                 // sempre que termina a contagem de tempo
-                this.timeBar.event.add(GameBase.Bar.E.TimeEvent.OnEndCount, function () {
+                this.timeBar.event.add(Bar.E.TimeEvent.OnEndCount, function () {
                     _this.endTimeBar();
                 }, this);
                 this.likometer.event.add(GameBase.Bar.E.LikometerEvent.OnOver, function () {
@@ -832,72 +836,20 @@ var GameBase;
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
-    var Bar;
-    (function (Bar) {
-        var Vertical = (function (_super) {
-            __extends(Vertical, _super);
-            function Vertical(game, backSprite, barSprite, borderSprite) {
-                var _this = _super.call(this, game) || this;
-                _this.value = 100;
-                _this.backSprite = backSprite;
-                _this.barSprite = barSprite;
-                _this.borderSprite = borderSprite;
-                return _this;
+    var Gaude;
+    (function (Gaude_1) {
+        var Gaude = (function (_super) {
+            __extends(Gaude, _super);
+            function Gaude(game) {
+                return _super.call(this, game) || this;
             }
-            Vertical.prototype.create = function () {
-                // cria uma mascara do tamanho da barra
-                this.maskGraph = this.game.add.graphics(0, 0);
-                this.maskGraph.beginFill(0xffffff);
-                this.maskGraph.lineStyle(1, 0xffd900, 1);
-                console.log('this.borderSprite.width:', this.borderSprite.width);
-                console.log('this.borderSprite.height:', this.borderSprite.height);
-                this.maskGraph.drawRect(0, 0, this.borderSprite.width, this.borderSprite.height);
-                this.maskGraph.endFill();
-                // this.mask = this.maskGraph;
-                this.barSprite.mask = this.maskGraph;
-                // usa o tamanho da mascara como tamanho 100%
-                this.maxSize = this.borderSprite.height;
-                // this.barSprite.y += 100
-                this.add(this.backSprite);
-                this.add(this.barSprite);
-                this.add(this.borderSprite);
-                this.add(this.maskGraph);
+            Gaude.prototype.build = function () {
+                this.bg = this.game.add.sprite(0, 0, 'gaude-bg');
             };
-            Vertical.prototype.addValue = function (value) {
-                this.value += value;
-                this.value = this.value > 100 ? 100 : this.value;
-                this.processValue();
-            };
-            Vertical.prototype.removeValue = function (value) {
-                this.value -= value;
-                this.value = this.value < 0 ? 0 : this.value;
-                this.processValue();
-            };
-            Vertical.prototype.setValue = function (value) {
-                this.value = value;
-                this.value = this.value < 0 ? 0 : this.value;
-                this.value = this.value > 100 ? 100 : this.value;
-                this.processValue();
-            };
-            Vertical.prototype.getValue = function () {
-                return this.value;
-            };
-            Vertical.prototype.processValue = function (time) {
-                if (time === void 0) { time = 500; }
-                var x = this.value * 0.01;
-                var v = this.maxSize - (x * this.maxSize); // - this.maxSize;
-                // se houver alguma animação, pausa
-                if (this.tween)
-                    this.tween.stop(true);
-                //
-                this.tween = this.addTween(this.barSprite).to({
-                    y: v
-                }, time, Phaser.Easing.Back.Out, true);
-            };
-            return Vertical;
+            return Gaude;
         }(Pk.PkElement));
-        Bar.Vertical = Vertical;
-    })(Bar = GameBase.Bar || (GameBase.Bar = {}));
+        Gaude_1.Gaude = Gaude;
+    })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
@@ -935,6 +887,11 @@ var GameBase;
                     // console.log('carro 2 bateu');
                     _this.carHit(_this.cars[1], _this.cars[0]);
                 }, this);
+                // barra de clique
+                setTimeout(function () {
+                    _this.gaude = new GameBase.Gaude.Gaude(_this.game);
+                    _this.gaude.build();
+                }, 1000);
             };
             Battle.prototype.carHit = function (carA, carB) {
                 // aplica o dano
@@ -1194,6 +1151,74 @@ var GameBase;
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
+    var Gaude;
+    (function (Gaude_2) {
+        var Gaude = (function (_super) {
+            __extends(Gaude, _super);
+            function Gaude(game) {
+                var _this = _super.call(this, game) || this;
+                _this.padding = 10;
+                _this.pushForce = -100;
+                return _this;
+            }
+            Gaude.prototype.build = function () {
+                var _this = this;
+                this.bg = this.game.add.sprite(0, 0, 'gaude-bg');
+                this.add(this.bg);
+                this.mark = this.game.add.sprite(0, 0, 'gaude-mark');
+                this.add(this.mark);
+                this.button = this.game.add.sprite(0, 0, 'gaude-button');
+                this.add(this.button);
+                this.button.anchor.x = 0.5;
+                this.button.x = this.bg.width / 2;
+                this.button.y = this.bg.height - 5;
+                // config btn
+                this.button.inputEnabled = true;
+                this.button.input.useHandCursor = true;
+                this.button.events.onInputDown.add(function () {
+                    _this.push();
+                }, this);
+                this.game.physics.box2d.enable(this.mark);
+                this.mark.body.fixedRotation = true;
+                this.mark.body.setRectangle(this.mark.width, this.mark.height, this.mark.width / 2 - 10, this.mark.height / 2 - 5, 0);
+                this.mark.body.x += this.mark.width;
+                this.mark.body.y += 150;
+                var graber = this.game.add.sprite(0, 0, '');
+                this.add(graber);
+                this.game.physics.box2d.enable(graber);
+                graber.body.setCircle(5);
+                graber.body.x = this.mark.body.x;
+                graber.body.y = this.padding;
+                graber.body.static = true;
+                // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
+                this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height - 10, true);
+                this.x = this.padding;
+                this.y = this.padding;
+                /*
+                this.game.input.onDown.add(this.mouseDragStart, this);
+                this.game.input.addMoveCallback(this.mouseDragMove, this);
+                this.game.input.onUp.add(this.mouseDragEnd, this);
+                */
+            };
+            Gaude.prototype.push = function () {
+                this.mark.body.applyForce(0, this.pushForce);
+            };
+            Gaude.prototype.mouseDragStart = function () {
+                this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
+            };
+            Gaude.prototype.mouseDragMove = function () {
+                this.game.physics.box2d.mouseDragMove(this.game.input.mousePointer);
+            };
+            Gaude.prototype.mouseDragEnd = function () {
+                this.game.physics.box2d.mouseDragEnd();
+            };
+            return Gaude;
+        }(Pk.PkElement));
+        Gaude_2.Gaude = Gaude;
+    })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
     var Icon;
     (function (Icon_1) {
         var Icon = (function (_super) {
@@ -1412,7 +1437,7 @@ var GameBase;
         };
         Main.prototype.render = function () {
             // this.game.debug.box2dWorld();
-            this.game.debug.text('Main Screen', this.game.world.centerX, 35);
+            this.game.debug.text('Já bebeu agua hoje?', this.game.world.centerX, 35);
         };
         // calls when leaving state
         Main.prototype.shutdown = function () {

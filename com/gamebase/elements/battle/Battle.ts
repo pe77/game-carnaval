@@ -5,6 +5,7 @@ module GameBase
         export class Battle extends Pk.PkElement
         {
             cars:[Car.Car, Car.Car];
+            gaude:Gaude.Gaude;
 
             constructor(game:Pk.PkGame)
             {
@@ -28,7 +29,7 @@ module GameBase
                 if(!this.cars.length)
                     return false;
                 //
-
+                
                 // cria / posiciona
                 this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
                 this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
@@ -45,6 +46,14 @@ module GameBase
                     // console.log('carro 2 bateu');
                     this.carHit(this.cars[1], this.cars[0]);
                 }, this);
+                
+
+                // barra de clique
+                setTimeout(()=>{
+                    this.gaude = new Gaude.Gaude(this.game);
+                this.gaude.build();
+                }, 1000)
+                
 
             }
 
