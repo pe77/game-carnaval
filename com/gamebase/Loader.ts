@@ -86,9 +86,30 @@ module GameBase {
             this.load.image('gaude-button', 'assets/default/gaude/gaude-button.png');
 
             // car parts
-            this.load.image('car-1-tire', 'assets/default/car/tire.png');
-            this.load.image('car-1-body', 'assets/default/car/body.png');
-            this.load.image('car-1-platform', 'assets/default/car/platform.png');
+            this.load.image('car-tire', 'assets/default/car/tire.png');
+            this.load.image('car-body', 'assets/default/car/body.png');
+            this.load.image('car-platform', 'assets/default/car/platform.png');
+
+            // A
+            this.load.image('car-a-tire', 'assets/default/car/a/tire.png');
+            this.load.image('car-a-body', 'assets/default/car/a/body.png');
+            this.load.image('car-a-platform', 'assets/default/car/a/platform.png');
+
+            // B
+            this.load.image('car-b-tire', 'assets/default/car/b/tire.png');
+            this.load.image('car-b-body', 'assets/default/car/b/body.png');
+            this.load.image('car-b-platform', 'assets/default/car/b/platform.png');
+
+            // C
+            this.load.image('car-c-tire', 'assets/default/car/a/tire.png');
+            this.load.image('car-c-body', 'assets/default/car/a/body.png');
+            this.load.image('car-c-platform', 'assets/default/car/a/platform.png');
+
+            // D
+            this.load.image('car-d-tire', 'assets/default/car/d/tire.png');
+            this.load.image('car-d-body', 'assets/default/car/d/body.png');
+            this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
+
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

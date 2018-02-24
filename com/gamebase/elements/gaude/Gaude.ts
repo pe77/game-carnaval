@@ -67,6 +67,11 @@ module GameBase
                 this.game.input.addMoveCallback(this.mouseDragMove, this);
                 this.game.input.onUp.add(this.mouseDragEnd, this);
                 */
+                /*
+                143-180
+52-164
+70-104
+                */
 
             }
 

@@ -18,6 +18,7 @@ module GameBase
             death:boolean = false;
 
             partyBoys:Array<PartyBoy.PartyBoy> = [];
+            partyBoysMax:number = 6;
 
             bodySprite:Phaser.Sprite;
 
@@ -25,6 +26,9 @@ module GameBase
 
             lineSprite:Phaser.Sprite;
             lineGraph:Phaser.Graphics;
+
+
+            platformSpriteKey:string = 'car-platform';
 
             constructor(game:Pk.PkGame, car:Car.Car)
             {
@@ -37,7 +41,7 @@ module GameBase
                 // salva a direção
                 this.direction = direction;
 
-                this.base = this.game.add.sprite(0, 0, 'car-1-platform');
+                this.base = this.game.add.sprite(0, 0, this.platformSpriteKey);
                 this.base.scale.x *= -this.direction;
                 this.base.anchor.set(.5, .5);
 
@@ -83,17 +87,19 @@ module GameBase
                 
             }
 
-            setPartyBoys(partyBoys:Array<PartyBoy.PartyBoy>)
+            addPartyBoys(partyBoy:PartyBoy.PartyBoy)
             {
-                this.partyBoys = partyBoys;
-                var total:number = this.partyBoys.length;
-                for(var i = 0; i < total; i++)
-                {
-                    var posX:number = -(this.size / 2) + ((this.size / (total-1)) * i) ;
-                    
-                    this.partyBoys[i].build(posX, this.base.body);
-                    
-                }
+                // se já bateu no maximo, retorna 
+                if(partyBoy.length == this.partyBoysMax)
+                    return false;
+                //
+
+                var posX:number = -this.size/2 + (20*this.partyBoys.length);
+
+                this.partyBoys.push(partyBoy);
+                partyBoy.build(posX, this.base.body);
+                
+                return true;
             }
 
             kill()

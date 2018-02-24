@@ -619,9 +619,25 @@ var GameBase;
             this.load.image('gaude-mark', 'assets/default/gaude/gaude-mark.png');
             this.load.image('gaude-button', 'assets/default/gaude/gaude-button.png');
             // car parts
-            this.load.image('car-1-tire', 'assets/default/car/tire.png');
-            this.load.image('car-1-body', 'assets/default/car/body.png');
-            this.load.image('car-1-platform', 'assets/default/car/platform.png');
+            this.load.image('car-tire', 'assets/default/car/tire.png');
+            this.load.image('car-body', 'assets/default/car/body.png');
+            this.load.image('car-platform', 'assets/default/car/platform.png');
+            // A
+            this.load.image('car-a-tire', 'assets/default/car/a/tire.png');
+            this.load.image('car-a-body', 'assets/default/car/a/body.png');
+            this.load.image('car-a-platform', 'assets/default/car/a/platform.png');
+            // B
+            this.load.image('car-b-tire', 'assets/default/car/b/tire.png');
+            this.load.image('car-b-body', 'assets/default/car/b/body.png');
+            this.load.image('car-b-platform', 'assets/default/car/b/platform.png');
+            // C
+            this.load.image('car-c-tire', 'assets/default/car/a/tire.png');
+            this.load.image('car-c-body', 'assets/default/car/a/body.png');
+            this.load.image('car-c-platform', 'assets/default/car/a/platform.png');
+            // D
+            this.load.image('car-d-tire', 'assets/default/car/d/tire.png');
+            this.load.image('car-d-body', 'assets/default/car/d/body.png');
+            this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -836,23 +852,6 @@ var GameBase;
 })(GameBase || (GameBase = {}));
 var GameBase;
 (function (GameBase) {
-    var Gaude;
-    (function (Gaude_1) {
-        var Gaude = (function (_super) {
-            __extends(Gaude, _super);
-            function Gaude(game) {
-                return _super.call(this, game) || this;
-            }
-            Gaude.prototype.build = function () {
-                this.bg = this.game.add.sprite(0, 0, 'gaude-bg');
-            };
-            return Gaude;
-        }(Pk.PkElement));
-        Gaude_1.Gaude = Gaude;
-    })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
-})(GameBase || (GameBase = {}));
-var GameBase;
-(function (GameBase) {
     var Battle;
     (function (Battle_1) {
         var Battle = (function (_super) {
@@ -925,12 +924,15 @@ var GameBase;
                 _this.motorSpeed = 50;
                 _this.rideHeight = 0.8;
                 _this.direction = 1;
-                _this.damage = [1, 6];
+                _this.damage = [1, 2];
                 _this.driveJoints = [];
                 _this.name = '-nome padrão-';
                 // plataformas
                 _this.platforms = [];
-                _this.partyBoys = [];
+                _this.platformsTotal = 2;
+                _this.bodySpriteKey = 'car-body';
+                _this.tireSpriteKey = 'tire-body';
+                _this.platformSpriteKey = 'platform-body';
                 return _this;
             }
             Car.prototype.build = function (position, direction) {
@@ -939,7 +941,7 @@ var GameBase;
                 if (direction === void 0) { direction = 1; }
                 this.direction = direction;
                 this.base = new Phaser.Sprite(this.game, 0, 0);
-                this.bodySprite = this.game.add.sprite(0, 0, 'car-1-body');
+                this.bodySprite = this.game.add.sprite(0, 0, this.bodySpriteKey);
                 this.bodySprite.scale.x *= -this.direction;
                 this.bodySprite.anchor.set(.5, .5);
                 this.game.physics.box2d.enable(this.base);
@@ -950,9 +952,8 @@ var GameBase;
                 this.sensor = this.base.body.addRectangle(this.size * 3, this.size, 0, this.size / 2 - this.size / 2);
                 this.sensor.SetSensor(true);
                 var PTM = this.size;
-                // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
-                var tireSprite1 = this.game.add.sprite(0, 500, 'car-1-tire');
-                var tireSprite2 = this.game.add.sprite(0, 500, 'car-1-tire');
+                var tireSprite1 = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                var tireSprite2 = this.game.add.sprite(0, 500, this.tireSpriteKey);
                 this.game.physics.box2d.enable(tireSprite1);
                 this.game.physics.box2d.enable(tireSprite2);
                 var wheelBodies = [];
@@ -963,26 +964,30 @@ var GameBase;
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
                 this.driveJoints[1] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[1], 1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // front
                 // add plataformas
-                var platform = new GameBase.Car.Platform(this.game, this);
-                platform.build(this.direction, this.base.body);
-                this.platforms.push(platform);
-                var platform2 = new GameBase.Car.Platform(this.game, this);
-                platform2.build(-this.direction, platform.base);
-                this.platforms.push(platform2);
-                var platform3 = new GameBase.Car.Platform(this.game, this);
-                platform3.build(this.direction, platform2.base);
-                this.platforms.push(platform3);
+                for (var i_1 = 0; i_1 < this.platformsTotal; i_1++) {
+                    // cria a plataforma
+                    var platform = new GameBase.Car.Platform(this.game, this);
+                    platform.platformSpriteKey = this.platformSpriteKey;
+                    // seleciona o anexo
+                    var anex;
+                    if (!i_1)
+                        anex = this.base.body; // carro
+                    else
+                        anex = this.platforms[i_1 - 1].base;
+                    //
+                    // direção, even/odd
+                    var direction = i_1 % 2 == 0 ? this.direction : -this.direction;
+                    platform.build(direction, anex);
+                    this.platforms.push(platform);
+                }
                 // add foliões
-                var total = 6;
                 for (var i in this.platforms) {
-                    var partyBoys = [];
-                    for (var j = 0; j < total; j++) {
+                    for (var j = 0; j < this.platforms[i].partyBoysMax; j++) {
                         var pb = new GameBase.PartyBoy.PartyBoy(this.game);
                         pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
-                        partyBoys.push(pb);
-                        this.partyBoys.push(pb);
+                        // add
+                        this.platforms[i].addPartyBoys(pb);
                     }
-                    this.platforms[i].setPartyBoys(partyBoys);
                 }
                 // colisão
                 this.base.body.setCollisionCategory(GameBase.CollisionCategories.Car);
@@ -1002,9 +1007,9 @@ var GameBase;
                 // this.game.input.onDown.add(this.mouseDragStart, this);
                 // this.game.input.addMoveCallback(this.mouseDragMove, this);
                 // this.game.input.onUp.add(this.mouseDragEnd, this);
-                for (var i_1 = 0; i_1 < 2; i_1++) {
-                    this.driveJoints[i_1].EnableMotor(true);
-                    this.driveJoints[i_1].SetMotorSpeed(this.motorSpeed * this.direction);
+                for (var i_2 = 0; i_2 < 2; i_2++) {
+                    this.driveJoints[i_2].EnableMotor(true);
+                    this.driveJoints[i_2].SetMotorSpeed(this.motorSpeed * this.direction);
                 }
             };
             Car.prototype.mouseDragStart = function () {
@@ -1029,10 +1034,15 @@ var GameBase;
                 iconUp.x = this.base.body.x - this.base.width / 2;
                 iconUp.y = this.base.body.y - 50;
                 iconUp.go();
-                // mata um partyboy, se houver
-                if (this.partyBoys.length) {
-                    var pb = this.partyBoys.pop();
-                    pb.kill();
+                // mata DAMAGE partyboy, se houver algum
+                for (var j = 0; j < damage; j++) {
+                    for (var i = this.platforms.length - 1; i >= 0; i--) {
+                        if (this.platforms[i].partyBoys.length) {
+                            var pb = this.platforms[i].direction == -1 ? this.platforms[i].partyBoys.pop() : this.platforms[i].partyBoys.shift();
+                            pb.kill();
+                            break;
+                        }
+                    }
                 }
                 return damage;
             };
@@ -1059,6 +1069,80 @@ var GameBase;
 (function (GameBase) {
     var Car;
     (function (Car) {
+        var CarA = (function (_super) {
+            __extends(CarA, _super);
+            function CarA(game) {
+                var _this = _super.call(this, game) || this;
+                _this.bodySpriteKey = 'car-a-body';
+                _this.platformSpriteKey = 'car-a-platform';
+                _this.tireSpriteKey = 'car-a-tire';
+                _this.damage = [1, 5];
+                return _this;
+            }
+            return CarA;
+        }(Car.Car));
+        Car.CarA = CarA;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
+        var CarB = (function (_super) {
+            __extends(CarB, _super);
+            function CarB(game) {
+                var _this = _super.call(this, game) || this;
+                _this.bodySpriteKey = 'car-b-body';
+                _this.platformSpriteKey = 'car-b-platform';
+                _this.tireSpriteKey = 'car-b-tire';
+                return _this;
+            }
+            return CarB;
+        }(Car.Car));
+        Car.CarB = CarB;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
+        var CarC = (function (_super) {
+            __extends(CarC, _super);
+            function CarC(game) {
+                var _this = _super.call(this, game) || this;
+                _this.bodySpriteKey = 'car-c-body';
+                _this.platformSpriteKey = 'car-c-platform';
+                _this.tireSpriteKey = 'car-c-tire';
+                return _this;
+            }
+            return CarC;
+        }(Car.Car));
+        Car.CarC = CarC;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
+        var CarD = (function (_super) {
+            __extends(CarD, _super);
+            function CarD(game) {
+                var _this = _super.call(this, game) || this;
+                _this.bodySpriteKey = 'car-d-body';
+                _this.platformSpriteKey = 'car-d-platform';
+                _this.tireSpriteKey = 'car-d-tire';
+                _this.platformsTotal = 4;
+                return _this;
+            }
+            return CarD;
+        }(Car.Car));
+        Car.CarD = CarD;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
         var Platform = (function (_super) {
             __extends(Platform, _super);
             function Platform(game, car) {
@@ -1067,6 +1151,8 @@ var GameBase;
                 _this.direction = 1;
                 _this.death = false;
                 _this.partyBoys = [];
+                _this.partyBoysMax = 6;
+                _this.platformSpriteKey = 'car-platform';
                 _this.car = car; // referencia do carro... vai que precisa
                 return _this;
             }
@@ -1074,7 +1160,7 @@ var GameBase;
                 var _this = this;
                 // salva a direção
                 this.direction = direction;
-                this.base = this.game.add.sprite(0, 0, 'car-1-platform');
+                this.base = this.game.add.sprite(0, 0, this.platformSpriteKey);
                 this.base.scale.x *= -this.direction;
                 this.base.anchor.set(.5, .5);
                 this.game.physics.box2d.enable(this.base);
@@ -1101,13 +1187,15 @@ var GameBase;
                     // this.lineSprite = this.game.add.sprite(0, 0, graphics);
                 }
             };
-            Platform.prototype.setPartyBoys = function (partyBoys) {
-                this.partyBoys = partyBoys;
-                var total = this.partyBoys.length;
-                for (var i = 0; i < total; i++) {
-                    var posX = -(this.size / 2) + ((this.size / (total - 1)) * i);
-                    this.partyBoys[i].build(posX, this.base.body);
-                }
+            Platform.prototype.addPartyBoys = function (partyBoy) {
+                // se já bateu no maximo, retorna 
+                if (partyBoy.length == this.partyBoysMax)
+                    return false;
+                //
+                var posX = -this.size / 2 + (20 * this.partyBoys.length);
+                this.partyBoys.push(partyBoy);
+                partyBoy.build(posX, this.base.body);
+                return true;
             };
             Platform.prototype.kill = function () {
                 var _this = this;
@@ -1152,7 +1240,7 @@ var GameBase;
 var GameBase;
 (function (GameBase) {
     var Gaude;
-    (function (Gaude_2) {
+    (function (Gaude_1) {
         var Gaude = (function (_super) {
             __extends(Gaude, _super);
             function Gaude(game) {
@@ -1199,6 +1287,11 @@ var GameBase;
                 this.game.input.addMoveCallback(this.mouseDragMove, this);
                 this.game.input.onUp.add(this.mouseDragEnd, this);
                 */
+                /*
+                143-180
+52-164
+70-104
+                */
             };
             Gaude.prototype.push = function () {
                 this.mark.body.applyForce(0, this.pushForce);
@@ -1214,7 +1307,7 @@ var GameBase;
             };
             return Gaude;
         }(Pk.PkElement));
-        Gaude_2.Gaude = Gaude;
+        Gaude_1.Gaude = Gaude;
     })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
@@ -1422,10 +1515,9 @@ var GameBase;
             // gerenciador da batalha
             this.battle = new GameBase.Battle.Battle(this.game);
             // chão
-            var car1 = new GameBase.Car.Car(this.game);
+            var car1 = new GameBase.Car.CarA(this.game);
             car1.name = 'Carro 1';
-            car1.motorSpeed = 100;
-            var car2 = new GameBase.Car.Car(this.game);
+            var car2 = new GameBase.Car.CarD(this.game);
             car2.direction = -1;
             car2.name = 'Carro 2';
             // add os carros

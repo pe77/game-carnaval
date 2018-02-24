@@ -15,7 +15,7 @@ module GameBase
             rideHeight:number = 0.8;
             direction:number = 1;
 
-            damage:[number, number] = [1, 6];
+            damage:[number, number] = [1, 2];
 
             hitSensor:Phaser.Sprite;
             sensor:any;
@@ -26,10 +26,11 @@ module GameBase
 
             // plataformas
             platforms:Array<Car.Platform> = [];
+            platformsTotal:number = 2;
 
-            partyBoys:Array<PartyBoy.PartyBoy> = [];
-
-
+            bodySpriteKey:string = 'car-body';
+            tireSpriteKey:string = 'tire-body';
+            platformSpriteKey:string = 'platform-body';
             bodySprite:Phaser.Sprite;
 
             constructor(game:Pk.PkGame)
@@ -43,7 +44,7 @@ module GameBase
 
                 this.base = new Phaser.Sprite(this.game, 0, 0);
 
-                this.bodySprite = this.game.add.sprite(0, 0, 'car-1-body');
+                this.bodySprite = this.game.add.sprite(0, 0, this.bodySpriteKey);
                 this.bodySprite.scale.x *= -this.direction;
                 this.bodySprite.anchor.set(.5, .5);
                 
@@ -63,9 +64,8 @@ module GameBase
                 
                 var PTM = this.size;
 
-                // var tireSprite:Phaser.Sprite = new Phaser.Sprite(this.game, 0, 0, 'car-1-tire');
-                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 500, 'car-1-tire');
-                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 500, 'car-1-tire');
+                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 500, this.tireSpriteKey);
 
                 this.game.physics.box2d.enable(tireSprite1);
                 this.game.physics.box2d.enable(tireSprite2);
@@ -81,33 +81,40 @@ module GameBase
 
 
 
+
                 // add plataformas
-                var platform:Car.Platform = new GameBase.Car.Platform(this.game, this)
-                platform.build(this.direction, this.base.body);
-                this.platforms.push(platform);
+                for (let i = 0; i < this.platformsTotal; i++)
+                {
+                    // cria a plataforma
+                    var platform:Car.Platform = new GameBase.Car.Platform(this.game, this)
+                    platform.platformSpriteKey = this.platformSpriteKey;
 
-                var platform2:Car.Platform = new GameBase.Car.Platform(this.game, this)
-                platform2.build(-this.direction, platform.base);
-                this.platforms.push(platform2);
+                    // seleciona o anexo
+                    var anex:any;
+                    if(!i) // se não tem plartaforma anterior, anexa ao carro
+                        anex = this.base.body; // carro
+                    else
+                        anex = this.platforms[i-1].base;
+                    //
 
-                var platform3:Car.Platform = new GameBase.Car.Platform(this.game, this)
-                platform3.build(this.direction, platform2.base);
-                this.platforms.push(platform3);
+                    // direção, even/odd
+                    var direction = i % 2 == 0 ? this.direction : -this.direction ;
+
+                    platform.build(direction, anex);
+                    this.platforms.push(platform);
+                }
 
                 // add foliões
-                var total:number = 6;
                 for(var i in this.platforms)
                 {
-                    var partyBoys:Array<PartyBoy.PartyBoy> = [];
-                    for (var j = 0; j < total; j++) 
+                    for (var j = 0; j < this.platforms[i].partyBoysMax; j++) 
                     {
                         var pb:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
                         pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
-                        partyBoys.push(pb);
-                        this.partyBoys.push(pb);
-                    }
 
-                    this.platforms[i].setPartyBoys(partyBoys);
+                        // add
+                        this.platforms[i].addPartyBoys(pb)
+                    }
                 }
                 
 
@@ -182,13 +189,20 @@ module GameBase
 
                 iconUp.go();
 
-                // mata um partyboy, se houver
-                if(this.partyBoys.length)
-                {
-                    var pb:PartyBoy.PartyBoy = this.partyBoys.pop();
-                    pb.kill();
-                }
                 
+                // mata DAMAGE partyboy, se houver algum
+                for (let j = 0; j < damage; j++) {
+                    for(let i = this.platforms.length - 1; i >=0 ;i--)
+                    {    
+                        if(this.platforms[i].partyBoys.length) // se tem partyboy
+                        {
+                            var pb:PartyBoy.PartyBoy = this.platforms[i].direction == -1 ? this.platforms[i].partyBoys.pop() : this.platforms[i].partyBoys.shift();
+                            pb.kill();
+                            break;
+                        }
+                    }
+                }
+               
 
                 return damage;
             }

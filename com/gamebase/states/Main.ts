@@ -42,11 +42,10 @@ module GameBase
 			this.battle = new Battle.Battle(this.game);
 
 			// chão
-			var car1 = new Car.Car(this.game);
+			var car1 = new Car.CarA(this.game);
 			car1.name = 'Carro 1';
-			car1.motorSpeed = 100;
 
-			var car2 = new Car.Car(this.game);
+			var car2 = new Car.CarD(this.game);
 			car2.direction = -1;
 			car2.name = 'Carro 2';
 
