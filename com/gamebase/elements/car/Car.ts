@@ -255,19 +255,15 @@ module GameBase
                 // randomiza o dano
                 var damage:number = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
                 
-                // damage *= criticalFactor; // critico
+                damage *= criticalFactor; // critico
 
-                // anima, se for não for jogador
-                if(!this.playerCar || true) // deixa pra lá
-                {
-                    var iconUp:Icon.Icon = new Icon.Icon(this.game, '-' + damage);
-                    iconUp.create();
-                    iconUp.x = this.base.body.x - this.base.width / 2;
-                    iconUp.y = this.base.body.y - 50;
+                var iconUp:Icon.Icon = new Icon.Icon(this.game, '-' + damage);
+                iconUp.create();
+                iconUp.x = this.base.body.x - this.base.width / 2;
+                iconUp.y = this.base.body.y - 50;
 
-                    iconUp.go();
-                }
-
+                iconUp.go();
+                
                 // mata DAMAGE partyboy, se houver algum
                 for (let j = 0; j < damage; j++) {
                     for(let i = this.platforms.length - 1; i >=0 ;i--)

@@ -1150,15 +1150,12 @@ var GameBase;
                 if (criticalFactor === void 0) { criticalFactor = 1; }
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
-                // damage *= criticalFactor; // critico
-                // anima, se for não for jogador
-                if (!this.playerCar || true) {
-                    var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
-                    iconUp.create();
-                    iconUp.x = this.base.body.x - this.base.width / 2;
-                    iconUp.y = this.base.body.y - 50;
-                    iconUp.go();
-                }
+                damage *= criticalFactor; // critico
+                var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
+                iconUp.create();
+                iconUp.x = this.base.body.x - this.base.width / 2;
+                iconUp.y = this.base.body.y - 50;
+                iconUp.go();
                 // mata DAMAGE partyboy, se houver algum
                 for (var j = 0; j < damage; j++) {
                     for (var i = this.platforms.length - 1; i >= 0; i--) {
@@ -1699,10 +1696,14 @@ var GameBase;
             var car2 = new GameBase.Car.CarD(this.game);
             car2.direction = -1;
             car2.name = 'Carro 2';
-            car1.damage = [100, 100];
-            car2.damage = [100, 100];
             // add os carros
             this.battle.start(car1, car2);
+            this.battle.event.add(GameBase.Battle.E.BattleEvent.OnEnd, function (e, winner) {
+                if (winner)
+                    console.log('O vencedor foi o carro ', winner.name);
+                else
+                    console.log('Empate');
+            }, this);
         };
         Main.prototype.playSound = function () {
             // play music

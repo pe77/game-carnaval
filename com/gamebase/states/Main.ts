@@ -50,11 +50,15 @@ module GameBase
 			car2.direction = -1;
 			car2.name = 'Carro 2';
 
-			car1.damage = [100, 100]
-			car2.damage = [100, 100]
-
 			// add os carros
 			this.battle.start(car1, car2);
+			this.battle.event.add(Battle.E.BattleEvent.OnEnd, (e, winner:Car.Car)=>{
+				
+				if(winner)
+					console.log('O vencedor foi o carro ', winner.name);
+				else
+					console.log('Empate')
+			}, this)
 		}
 
 		playSound()
