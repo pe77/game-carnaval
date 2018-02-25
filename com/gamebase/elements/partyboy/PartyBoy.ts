@@ -62,7 +62,6 @@ module GameBase
                     this.base.destroy(); // mata de vez
                 }, 10000);
 
-                console.log('kill folião [', this.getId(), ']');
             }
         }
     }

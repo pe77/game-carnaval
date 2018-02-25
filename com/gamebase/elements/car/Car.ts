@@ -33,6 +33,9 @@ module GameBase
             platformSpriteKey:string = 'platform-body';
             bodySprite:Phaser.Sprite;
 
+            // se é um carro do jogador
+            playerCar:boolean = false;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -176,20 +179,23 @@ module GameBase
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             }
 
-            applyDamage(damageRange:[number, number]):number
+            applyDamage(damageRange:[number, number], criticalFactor:number = 1):number
             {
                 // randomiza o dano
                 var damage:number = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
+                damage *= criticalFactor; // critico
 
-                // anima
-                var iconUp:Icon.Icon = new Icon.Icon(this.game, '-' + damage);
-                iconUp.create();
-                iconUp.x = this.base.body.x - this.base.width / 2;
-                iconUp.y = this.base.body.y - 50;
+                // anima, se for não for jogador
+                if(!this.playerCar || true) // deixa pra lá
+                {
+                    var iconUp:Icon.Icon = new Icon.Icon(this.game, '-' + damage);
+                    iconUp.create();
+                    iconUp.x = this.base.body.x - this.base.width / 2;
+                    iconUp.y = this.base.body.y - 50;
 
-                iconUp.go();
+                    iconUp.go();
+                }
 
-                
                 // mata DAMAGE partyboy, se houver algum
                 for (let j = 0; j < damage; j++) {
                     for(let i = this.platforms.length - 1; i >=0 ;i--)

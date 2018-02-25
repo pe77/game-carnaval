@@ -59,8 +59,21 @@ module GameBase
 
             carHit(carA:Car.Car, carB:Car.Car)
             {
+                // pega o critico do gaude, se for carro do jogaro
+                var criticalFactor:number = 1;
+                if(carA.playerCar)                
+                {
+                    criticalFactor = this.gaude.hit();
+                    console.log('gaude hit factor: ' + criticalFactor)
+                }else{
+                    // inimigo tbm tem um fator de critico, baixo
+                    if(this.game.rnd.integerInRange(1, 4) == 4)
+                        criticalFactor = 2;
+                    //
+                }
+                
                 // aplica o dano
-                var damage:number = carB.applyDamage(carA.damage);
+                var damage:number = carB.applyDamage(carA.damage, criticalFactor);
 
                 // calcula o impulso em cima do dano causado
                 var forceX:number = 750 + (300 * damage);
@@ -72,7 +85,6 @@ module GameBase
                 // uma base força aplicada em si mesmo
                 carA.base.body.applyForce(300*-carA.direction, 300/2);
 
-                
 
                 // balança a camera
                 this.game.camera.shake(0.01, 100);

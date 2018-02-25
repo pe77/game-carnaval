@@ -11,6 +11,7 @@ module GameBase
 
             padding:number = 10;
             pushForce:number = -100;
+            
 
             constructor(game:Pk.PkGame)
             {
@@ -51,27 +52,34 @@ module GameBase
                 this.game.physics.box2d.enable(graber);
                 graber.body.setCircle(5);
                 graber.body.x = this.mark.body.x;
-                graber.body.y = this.padding;
+                graber.body.y = -this.padding;
                 graber.body.static = true;
                 
 
                 // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
-                this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height-10, true);
+                this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height+10, true);
 
 
                 this.x = this.padding;
                 this.y = this.padding;
 
                 /*
-                this.game.input.onDown.add(this.mouseDragStart, this);
-                this.game.input.addMoveCallback(this.mouseDragMove, this);
-                this.game.input.onUp.add(this.mouseDragEnd, this);
-                */
-                /*
-                143-180
-52-164
-70-104
-                */
+                    0
+                        0
+                    0-18
+                        5
+                    18-34
+                        0
+                    34-69
+                        3
+                    69-104
+                        2
+                    104-164
+                        1
+                    164-250
+                        0
+                    250
+                */ 
 
             }
 
@@ -80,24 +88,35 @@ module GameBase
                 this.mark.body.applyForce(0, this.pushForce);
             }
 
-            
-            mouseDragStart() {
+            hit():number
+            {
+                var hitValue:number = 0;
+                var posValue:number = this.mark.body.y;
+
+                // de-até, valor
+                var ranges:Array<[number, number, number]> = new Array();
                 
-                this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
-                
+                ranges.push([18,   34,  5]); 
+                ranges.push([69,   104, 3]); 
+                ranges.push([105,  164, 2]); 
+                ranges.push([165,  250, 1]); 
+
+
+                for(var i in ranges)
+                {
+                    if(posValue >= ranges[i][0] && posValue <= ranges[i][1])
+                    {
+                        hitValue = ranges[i][2];
+                        break;
+                    }
+                        
+                }
+                //
+
+
+                return hitValue;
             }
 
-            mouseDragMove() {
-                
-                this.game.physics.box2d.mouseDragMove(this.game.input.mousePointer);
-                
-            }
-
-            mouseDragEnd() {
-                
-                this.game.physics.box2d.mouseDragEnd();
-                
-            }
 
         }
     }

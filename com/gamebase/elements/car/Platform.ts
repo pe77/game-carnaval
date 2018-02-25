@@ -56,7 +56,7 @@ module GameBase
                 setTimeout(()=>{
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
                     this.base.body.fixedRotation = false;
-                }, 500)
+                }, 1500)
 
                 // console.log(this.joint)
 

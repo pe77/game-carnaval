@@ -43,6 +43,7 @@ module GameBase
 
 			// chão
 			var car1 = new Car.CarA(this.game);
+			car1.playerCar = true;
 			car1.name = 'Carro 1';
 
 			var car2 = new Car.CarD(this.game);

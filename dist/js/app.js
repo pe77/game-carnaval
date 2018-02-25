@@ -893,8 +893,20 @@ var GameBase;
                 }, 1000);
             };
             Battle.prototype.carHit = function (carA, carB) {
+                // pega o critico do gaude, se for carro do jogaro
+                var criticalFactor = 1;
+                if (carA.playerCar) {
+                    criticalFactor = this.gaude.hit();
+                    console.log('gaude hit factor: ' + criticalFactor);
+                }
+                else {
+                    // inimigo tbm tem um fator de critico, baixo
+                    if (this.game.rnd.integerInRange(1, 4) == 4)
+                        criticalFactor = 2;
+                    //
+                }
                 // aplica o dano
-                var damage = carB.applyDamage(carA.damage);
+                var damage = carB.applyDamage(carA.damage, criticalFactor);
                 // calcula o impulso em cima do dano causado
                 var forceX = 750 + (300 * damage);
                 var forceY = -750 - (300 * damage);
@@ -933,6 +945,8 @@ var GameBase;
                 _this.bodySpriteKey = 'car-body';
                 _this.tireSpriteKey = 'tire-body';
                 _this.platformSpriteKey = 'platform-body';
+                // se é um carro do jogador
+                _this.playerCar = false;
                 return _this;
             }
             Car.prototype.build = function (position, direction) {
@@ -1025,15 +1039,19 @@ var GameBase;
                 // dispara o evento de morte
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             };
-            Car.prototype.applyDamage = function (damageRange) {
+            Car.prototype.applyDamage = function (damageRange, criticalFactor) {
+                if (criticalFactor === void 0) { criticalFactor = 1; }
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
-                // anima
-                var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
-                iconUp.create();
-                iconUp.x = this.base.body.x - this.base.width / 2;
-                iconUp.y = this.base.body.y - 50;
-                iconUp.go();
+                damage *= criticalFactor; // critico
+                // anima, se for não for jogador
+                if (!this.playerCar || true) {
+                    var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
+                    iconUp.create();
+                    iconUp.x = this.base.body.x - this.base.width / 2;
+                    iconUp.y = this.base.body.y - 50;
+                    iconUp.go();
+                }
                 // mata DAMAGE partyboy, se houver algum
                 for (var j = 0; j < damage; j++) {
                     for (var i = this.platforms.length - 1; i >= 0; i--) {
@@ -1171,7 +1189,7 @@ var GameBase;
                 setTimeout(function () {
                     // this.joint = this.game.physics.box2d.weldJoint(body, this.base, 0, -20, 40 * direction, 80, 5, 0.0);
                     _this.base.body.fixedRotation = false;
-                }, 500);
+                }, 1500);
                 // console.log(this.joint)
                 this.jointBody = body;
                 // return this.joint; // retorna o vinculo
@@ -1276,34 +1294,50 @@ var GameBase;
                 this.game.physics.box2d.enable(graber);
                 graber.body.setCircle(5);
                 graber.body.x = this.mark.body.x;
-                graber.body.y = this.padding;
+                graber.body.y = -this.padding;
                 graber.body.static = true;
                 // bodyA, bodyB, axisX, axisY, ax, ay, bx, by, motorSpeed, motorForce, motorEnabled, lowerLimit, upperLimit, limitEnabled
-                this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height - 10, true);
+                this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height + 10, true);
                 this.x = this.padding;
                 this.y = this.padding;
                 /*
-                this.game.input.onDown.add(this.mouseDragStart, this);
-                this.game.input.addMoveCallback(this.mouseDragMove, this);
-                this.game.input.onUp.add(this.mouseDragEnd, this);
-                */
-                /*
-                143-180
-52-164
-70-104
+                    0
+                        0
+                    0-18
+                        5
+                    18-34
+                        0
+                    34-69
+                        3
+                    69-104
+                        2
+                    104-164
+                        1
+                    164-250
+                        0
+                    250
                 */
             };
             Gaude.prototype.push = function () {
                 this.mark.body.applyForce(0, this.pushForce);
             };
-            Gaude.prototype.mouseDragStart = function () {
-                this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
-            };
-            Gaude.prototype.mouseDragMove = function () {
-                this.game.physics.box2d.mouseDragMove(this.game.input.mousePointer);
-            };
-            Gaude.prototype.mouseDragEnd = function () {
-                this.game.physics.box2d.mouseDragEnd();
+            Gaude.prototype.hit = function () {
+                var hitValue = 0;
+                var posValue = this.mark.body.y;
+                // de-até, valor
+                var ranges = new Array();
+                ranges.push([18, 34, 5]);
+                ranges.push([69, 104, 3]);
+                ranges.push([105, 164, 2]);
+                ranges.push([165, 250, 1]);
+                for (var i in ranges) {
+                    if (posValue >= ranges[i][0] && posValue <= ranges[i][1]) {
+                        hitValue = ranges[i][2];
+                        break;
+                    }
+                }
+                //
+                return hitValue;
             };
             return Gaude;
         }(Pk.PkElement));
@@ -1387,7 +1421,6 @@ var GameBase;
                 setTimeout(function () {
                     _this.base.destroy(); // mata de vez
                 }, 10000);
-                console.log('kill folião [', this.getId(), ']');
             };
             return PartyBoy;
         }(Pk.PkElement));
@@ -1516,6 +1549,7 @@ var GameBase;
             this.battle = new GameBase.Battle.Battle(this.game);
             // chão
             var car1 = new GameBase.Car.CarA(this.game);
+            car1.playerCar = true;
             car1.name = 'Carro 1';
             var car2 = new GameBase.Car.CarD(this.game);
             car2.direction = -1;
