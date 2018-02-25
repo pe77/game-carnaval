@@ -891,7 +891,7 @@ var GameBase;
                 // pega o critico do gaude, se for carro do jogaro
                 var criticalFactor = 1;
                 if (carA.playerCar) {
-                    criticalFactor = carA.gaude.hit();
+                    criticalFactor = carA.gaude ? carA.gaude.hit() : 1;
                     console.log('gaude hit factor: ' + criticalFactor);
                 }
                 else {
@@ -1042,13 +1042,9 @@ var GameBase;
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             };
             Car.prototype.applyDamage = function (damageRange, criticalFactor) {
-                if (criticalFactor === void 0) { criticalFactor = NaN; }
+                if (criticalFactor === void 0) { criticalFactor = 1; }
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
-                // se não veio predefinido, pega da barra, se existir
-                if (criticalFactor == NaN)
-                    criticalFactor = this.gaude ? this.gaude.hit() : 1;
-                //
                 damage *= criticalFactor; // critico
                 // anima, se for não for jogador
                 if (!this.playerCar || true) {

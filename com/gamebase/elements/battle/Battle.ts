@@ -54,7 +54,7 @@ module GameBase
                 var criticalFactor:number = 1;
                 if(carA.playerCar)                
                 {
-                    criticalFactor = carA.gaude.hit();
+                    criticalFactor = carA.gaude ? carA.gaude.hit() : 1;
                     console.log('gaude hit factor: ' + criticalFactor)
                 }else{
                     // inimigo tbm tem um fator de critico, baixo

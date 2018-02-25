@@ -192,16 +192,11 @@ module GameBase
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             }
 
-            applyDamage(damageRange:[number, number], criticalFactor:number = NaN):number
+            applyDamage(damageRange:[number, number], criticalFactor:number = 1):number
             {
                 // randomiza o dano
                 var damage:number = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
                 
-                // se não veio predefinido, pega da barra, se existir
-                if(criticalFactor == NaN)
-                    criticalFactor = this.gaude ? this.gaude.hit() : 1;
-                //
-
                 damage *= criticalFactor; // critico
 
                 // anima, se for não for jogador
