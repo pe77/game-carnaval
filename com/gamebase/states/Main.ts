@@ -11,6 +11,9 @@ module GameBase
 
 		battle:Battle.Battle;
 
+		playerCar:Car.Car;
+		enemies:Array<Car.Car> = [];
+
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
@@ -41,24 +44,76 @@ module GameBase
 			// gerenciador da batalha
 			this.battle = new Battle.Battle(this.game);
 
-			// chão
-			var car1 = new Car.CarA(this.game);
-			car1.playerCar = true;
-			car1.name = 'Carro 1';
+			// carro do jogador
+			this.playerCar = new Car.CarA(this.game);
+			this.playerCar.playerCar = true;
+			this.playerCar.name = 'Carro 1';
+			// this.playerCar.damage = [100, 100];
 
-			var car2 = new Car.CarD(this.game);
-			car2.direction = -1;
-			car2.name = 'Carro 2';
+			// inimigos
+			var enemy1 = new Car.CarB(this.game);
+			enemy1.direction = -1;
+			enemy1.name = 'Inimigo 1';
 
-			// add os carros
-			this.battle.start(car1, car2);
+			var enemy2 = new Car.CarC(this.game);
+			enemy2.direction = -1;
+			enemy2.name = 'Inimigo 2';
+
+			var enemy3 = new Car.CarD(this.game);
+			enemy3.direction = -1;
+			enemy3.name = 'Inimigo 3';
+
+			this.enemies.push(enemy1);
+			this.enemies.push(enemy2);
+			this.enemies.push(enemy3);
+
+			// evento de fim de batalha
 			this.battle.event.add(Battle.E.BattleEvent.OnEnd, (e, winner:Car.Car)=>{
 				
 				if(winner)
 					console.log('O vencedor foi o carro ', winner.name);
 				else
 					console.log('Empate')
-			}, this)
+				//
+
+				// se o jogador ganhou, começa a proxima batalha
+				if(winner && winner.getId() == this.playerCar.getId())
+					this.nextBattle();
+				//
+
+			}, this);
+
+			// começa as paradas
+			this.nextBattle()
+		}
+
+		nextBattle()
+		{
+			console.log('-- NEXT BATTLE -- ');
+
+			// pega o carro do jogador + p proximo inimigo vivo
+			var nextEnemy:Car.Car;
+			for(var i in this.enemies)
+			{
+				if(!this.enemies[i].alive)
+					continue;
+				//
+
+				nextEnemy = this.enemies[i];
+
+				break;
+			}
+
+			// se existir outro inimigo
+			if(nextEnemy)
+			{
+				console.log(this.playerCar.name, ':: x ::', this.enemies[i].name);
+				this.battle.start(this.playerCar, nextEnemy);
+			}else{
+				alert('GANHOU, SEU LINDO!')
+			}
+			
+			
 		}
 
 		playSound()

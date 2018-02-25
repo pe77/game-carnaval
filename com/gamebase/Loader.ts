@@ -76,8 +76,19 @@ module GameBase {
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
 
+            /*
             for (var i = 0; i < 6; i++)
                 this.load.image('partyboy-' + (i+1), 'assets/default/car/f'+(i+1)+'.png');    
+            //
+            */
+
+            for (var i = 0; i < 14; i++)
+            {
+                var index:any = (i+1);
+                index = index < 10 ? '0' + index : index;
+                console.log('PB index:', index);
+                this.load.image('partyboy-' + (i+1), 'assets/default/car/Foliao_' + index + '.png');    
+            }
             //
 
             // gaude

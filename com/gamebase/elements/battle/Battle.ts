@@ -21,13 +21,17 @@ module GameBase
             {
                 this.cars = [carA, carB];
                 
-                
+                console.log('construindo carros')
+
                 // cria / posiciona
-                this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
-                this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
+                if(!this.cars[0].builded)
+                    this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);  
+                //
 
-                this.cars[0].name = 'carro 1';
-
+                if(!this.cars[1].builded)
+                    this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
+                //
+                    
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, (e, otherPlayer:Car.Car)=>{
                     
@@ -48,21 +52,34 @@ module GameBase
                 }, this);
 
                 this.resetCarsInterval = setInterval(()=>{
-                    var lastHit:number = this.game.time.totalElapsedSeconds() - this.lastHitTime;
 
-                    if(lastHit > this.resetCarsTolerance)
+                    this.lastHitTime++;
+
+                    if(this.lastHitTime > this.resetCarsTolerance)
                     {
                         this.pushOff();
                         this.pushOff();
                         this.pushOff();
                     }
-                        
-                    console.log('ultim hit>', this.game.time.totalElapsedSeconds() - this.lastHitTime);
+
                 }, 1000);
+                this.lastHitTime = 0;
 
                 // da uma empurrada
-                this.pushOff();
-                this.pushOff();
+                for (var index = 0; index < 10; index++) {
+                    this.pushOff();
+                    this.pushOff();
+                }
+                
+
+
+                // liga os MOTOREEEEESS
+                for(var i in this.cars)
+                    this.cars[i].engineOn();
+                //
+
+                // reseta a flag de termino de batalha
+                this.battleEnd = false;
             }
 
             // empurra os carros em direção contraria
@@ -73,6 +90,8 @@ module GameBase
                     if(this.cars[i].alive)
                         this.cars[i].base.body.applyForce(400*-this.cars[i].direction, 300/2);
                 //
+
+                this.lastHitTime = 0;
             }
 
             resolve()
@@ -103,11 +122,15 @@ module GameBase
                     // para a contage
                     clearInterval(this.resetCarsInterval);
                     
+                    var deadCar:Car.Car = null;
                     for(var i in this.cars)
                     {
                         // destroi quem não é o vencedor
                         if(!winner || this.cars[i].getId() != winner.getId())
+                        {
+                            deadCar = this.cars[i];
                             this.cars[i].kill();
+                        }
                         //
 
                         // desliga o motor
@@ -117,8 +140,15 @@ module GameBase
                         this.pushOff();
                     }
 
-                    // dispara o evento de termino
-                    this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
+                    deadCar.event.add(Car.E.CarEvent.OnKill, ()=>{
+                        console.log('Carro ' + deadCar.name, ' terminou de se destruir');
+                        
+                        // dispara o evento de termino
+                        this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
+
+                    }, this);
+
+                    
                 }
                     
                 //
@@ -126,8 +156,6 @@ module GameBase
 
             carHit(carA:Car.Car, carB:Car.Car)
             {
-                this.lastHitTime = this.game.time.totalElapsedSeconds();
-
                 // pega o critico do gaude, se for carro do jogaro
                 var criticalFactor:number = 1;
                 if(carA.playerCar)                

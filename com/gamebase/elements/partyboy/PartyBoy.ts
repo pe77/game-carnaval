@@ -20,14 +20,16 @@ module GameBase
             build(position:number, platformBody:Phaser.Physics.Box2D.Body)
             {
                 this.base = this.game.add.sprite(platformBody.x, 10, this.spriteKey);
+                // this.base.width = 20;
+                // this.base.height = 40;
                 
                 this.game.physics.box2d.enable(this.base);
                 this.body = this.base.body;
-                    
+                
                 this.body.sensor = true;
                 this.body.mass = 0.1;
                 
-                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height / 2), 0, this.base.height / 2, 3, 0.3);
+                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height/2) + 10, 0, this.base.height / 2, 3, 0.3);
             }
 
             kill()

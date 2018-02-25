@@ -39,6 +39,9 @@ module GameBase
             // se é um carro do jogador
             playerCar:boolean = false;
 
+            // se já esta montado
+            builded:boolean = false;
+
             // barrinha de critico
             gaude:Gaude.Gaude;
 
@@ -50,6 +53,8 @@ module GameBase
             build(position:Phaser.Point = new Phaser.Point(0, 0), direction:number = 1)
             {
                 this.direction = direction;
+
+                this.builded = true;
 
                 this.base = new Phaser.Sprite(this.game, 0, 0);
 
@@ -133,14 +138,12 @@ module GameBase
                 this.base.body.element = this;
                 this.base.body.setCategoryContactCallback(GameBase.CollisionCategories.Car, (body1, body2, fixture1, fixture2, begin)=>{
                     
+
+                    
                     if (!begin || body1.id == body2.id || !body2.element)
                         return;
                     //
 
-                    setTimeout(()=>{
-                        // console.log('DestroyJoint >>> ')
-                        // platform.kill();
-                    }, 100)
                     
                     var advCar:Car.Car = <Car.Car>body2.element;
 
@@ -226,6 +229,9 @@ module GameBase
                     setTimeout(()=>{
                         console.log('desliga roda ' + j)
                         this.game.physics.box2d.world.DestroyJoint(this.driveJoints[j]);
+                        this.tireSprite1.body.sensor = true;
+                        this.tireSprite2.body.sensor = true;
+                        this.base.body.sensor = true;
                     }, 200*parseInt(j));
                 }
 
@@ -242,12 +248,14 @@ module GameBase
                     this.bodySprite.destroy();
                     this.tireSprite1.destroy();
                     this.tireSprite2.destroy();
+
+                    // dispara o evento de morte
+                    this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
                 }, this);
 
 
 
-                // dispara o evento de morte
-                this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
+                
             }
 
             applyDamage(damageRange:[number, number], criticalFactor:number = 1):number
@@ -294,6 +302,9 @@ module GameBase
 
             update()
             {
+                if(!this.bodySprite)
+                    return;
+                //
                 this.bodySprite.x = this.base.body.x;
                 this.bodySprite.y = this.base.body.y;
 

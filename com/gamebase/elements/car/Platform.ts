@@ -115,7 +115,8 @@ module GameBase
                 this.game.physics.box2d.world.DestroyJoint(this.joint);
 
                 // joga pra cima
-                this.base.body.applyForce(300*-this.direction, -400)
+                this.base.body.applyForce(300*-this.direction, -400);
+                this.base.body.sensor = true;
 
                 setTimeout(()=>{
                     this.base.destroy(); // mata de vez
