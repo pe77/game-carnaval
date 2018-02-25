@@ -121,6 +121,9 @@ module GameBase {
             this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
             this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
             this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
+
+            // scene
+            this.load.image('main-bg', 'assets/states/main/bg.jpg');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

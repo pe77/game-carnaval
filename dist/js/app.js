@@ -646,6 +646,8 @@ var GameBase;
             this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
             this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
             this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
+            // scene
+            this.load.image('main-bg', 'assets/states/main/bg.jpg');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -1619,6 +1621,7 @@ var GameBase;
             }
             Floor.prototype.create = function () {
                 this.body = Pk.PkUtils.createSquare(this.game, this.game.world.width, 30);
+                this.body.alpha = 0;
                 this.body.y = this.game.world.height - this.body.height / 2;
                 this.body.x = this.game.world.centerX;
                 this.game.physics.box2d.enable(this.body);
@@ -1720,6 +1723,11 @@ var GameBase;
             this.game.stage.backgroundColor = "#938da0";
             // prevent stop update when focus out
             // this.stage.disableVisibilityChange = true;
+            // bg
+            var bg = this.game.add.sprite(0, 0, 'main-bg');
+            console.log('bg:', bg.width, bg.height);
+            console.log('gamwww:', this.game.world.width, this.game.world.height);
+            // bg.y -= 30;
             // Enable Box2D physics
             this.game.physics.startSystem(Phaser.Physics.BOX2D);
             this.game.physics.box2d.gravity.y = 500;

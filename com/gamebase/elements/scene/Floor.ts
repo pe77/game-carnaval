@@ -14,6 +14,7 @@ module GameBase
             create()
             {
                 this.body = Pk.PkUtils.createSquare(this.game, this.game.world.width, 30);
+                this.body.alpha = 0;
 
                 this.body.y = this.game.world.height - this.body.height / 2;
                 this.body.x = this.game.world.centerX;

@@ -20,6 +20,7 @@ module GameBase
 		audioWin:Phaser.Sound;
 		audioLose:Phaser.Sound;
 
+
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
@@ -34,6 +35,12 @@ module GameBase
 
 			// prevent stop update when focus out
             // this.stage.disableVisibilityChange = true;
+
+			// bg
+			var bg:Phaser.Sprite = this.game.add.sprite(0, 0, 'main-bg')
+			console.log('bg:', bg.width, bg.height)
+			console.log('gamwww:', this.game.world.width, this.game.world.height)
+			// bg.y -= 30;
 
 			// Enable Box2D physics
 			this.game.physics.startSystem(Phaser.Physics.BOX2D);
@@ -163,7 +170,6 @@ module GameBase
 		render()
         {
 			// this.game.debug.box2dWorld();
-			
             this.game.debug.text('Já bebeu agua hoje?', this.game.world.centerX, 35);
 			
         }
