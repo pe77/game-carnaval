@@ -886,17 +886,12 @@ var GameBase;
                     // console.log('carro 2 bateu');
                     _this.carHit(_this.cars[1], _this.cars[0]);
                 }, this);
-                // barra de clique
-                setTimeout(function () {
-                    _this.gaude = new GameBase.Gaude.Gaude(_this.game);
-                    _this.gaude.build();
-                }, 1000);
             };
             Battle.prototype.carHit = function (carA, carB) {
                 // pega o critico do gaude, se for carro do jogaro
                 var criticalFactor = 1;
                 if (carA.playerCar) {
-                    criticalFactor = this.gaude.hit();
+                    criticalFactor = carA.gaude.hit();
                     console.log('gaude hit factor: ' + criticalFactor);
                 }
                 else {
@@ -1021,6 +1016,13 @@ var GameBase;
                 // this.game.input.onDown.add(this.mouseDragStart, this);
                 // this.game.input.addMoveCallback(this.mouseDragMove, this);
                 // this.game.input.onUp.add(this.mouseDragEnd, this);
+                // barra de clique
+                setTimeout(function () {
+                    if (_this.playerCar) {
+                        _this.gaude = new GameBase.Gaude.Gaude(_this.game);
+                        _this.gaude.build();
+                    }
+                }, 1000);
                 for (var i_2 = 0; i_2 < 2; i_2++) {
                     this.driveJoints[i_2].EnableMotor(true);
                     this.driveJoints[i_2].SetMotorSpeed(this.motorSpeed * this.direction);
@@ -1040,9 +1042,13 @@ var GameBase;
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             };
             Car.prototype.applyDamage = function (damageRange, criticalFactor) {
-                if (criticalFactor === void 0) { criticalFactor = 1; }
+                if (criticalFactor === void 0) { criticalFactor = NaN; }
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
+                // se não veio predefinido, pega da barra, se existir
+                if (criticalFactor == NaN)
+                    criticalFactor = this.gaude ? this.gaude.hit() : 1;
+                //
                 damage *= criticalFactor; // critico
                 // anima, se for não for jogador
                 if (!this.playerCar || true) {
@@ -1065,7 +1071,6 @@ var GameBase;
                 return damage;
             };
             Car.prototype.update = function () {
-                // console.log('update', this.base.body.x, this.base.body.y)
                 this.bodySprite.x = this.base.body.x;
                 this.bodySprite.y = this.base.body.y;
                 this.bodySprite.bringToTop();
@@ -1336,12 +1341,53 @@ var GameBase;
                         break;
                     }
                 }
-                //
+                // empurra pro final
+                this.mark.body.applyForce(0, 2000);
+                // anima
+                var iconUp = new GameBase.Gaude.Icon(this.game, 'X' + hitValue);
+                iconUp.create();
+                iconUp.x = this.x + this.mark.width / 2;
+                iconUp.y = this.mark.body.y;
+                iconUp.go();
                 return hitValue;
             };
             return Gaude;
         }(Pk.PkElement));
         Gaude_1.Gaude = Gaude;
+    })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Gaude;
+    (function (Gaude) {
+        var Icon = (function (_super) {
+            __extends(Icon, _super);
+            function Icon(game, message) {
+                var _this = _super.call(this, game) || this;
+                _this.message = message;
+                return _this;
+            }
+            Icon.prototype.create = function () {
+                this.text = this.game.add.text(0, 0, this.message, // text
+                {
+                    font: "28px Love Story Rough",
+                    fill: "#202020"
+                } // font style
+                );
+                this.add(this.text);
+            };
+            Icon.prototype.go = function () {
+                var _this = this;
+                this.addTween(this).to({
+                    y: this.y - 20,
+                    x: this.x + 200,
+                }, 2000, Phaser.Easing.Circular.Out, true).onComplete.add(function () {
+                    _this.destroy();
+                }, this);
+            };
+            return Icon;
+        }(Pk.PkElement));
+        Gaude.Icon = Icon;
     })(Gaude = GameBase.Gaude || (GameBase.Gaude = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;

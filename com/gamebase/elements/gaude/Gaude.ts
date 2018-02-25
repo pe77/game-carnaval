@@ -111,8 +111,17 @@ module GameBase
                     }
                         
                 }
-                //
+                
+                // empurra pro final
+                this.mark.body.applyForce(0, 2000);
 
+                // anima
+                var iconUp:Gaude.Icon = new GameBase.Gaude.Icon(this.game, 'X' + hitValue);
+                iconUp.create();
+                iconUp.x = this.x + this.mark.width / 2;
+                iconUp.y = this.mark.body.y;
+
+                iconUp.go();
 
                 return hitValue;
             }

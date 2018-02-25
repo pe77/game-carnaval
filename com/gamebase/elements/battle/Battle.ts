@@ -5,7 +5,6 @@ module GameBase
         export class Battle extends Pk.PkElement
         {
             cars:[Car.Car, Car.Car];
-            gaude:Gaude.Gaude;
 
             constructor(game:Pk.PkGame)
             {
@@ -47,14 +46,6 @@ module GameBase
                     this.carHit(this.cars[1], this.cars[0]);
                 }, this);
                 
-
-                // barra de clique
-                setTimeout(()=>{
-                    this.gaude = new Gaude.Gaude(this.game);
-                this.gaude.build();
-                }, 1000)
-                
-
             }
 
             carHit(carA:Car.Car, carB:Car.Car)
@@ -63,7 +54,7 @@ module GameBase
                 var criticalFactor:number = 1;
                 if(carA.playerCar)                
                 {
-                    criticalFactor = this.gaude.hit();
+                    criticalFactor = carA.gaude.hit();
                     console.log('gaude hit factor: ' + criticalFactor)
                 }else{
                     // inimigo tbm tem um fator de critico, baixo
@@ -71,7 +62,7 @@ module GameBase
                         criticalFactor = 2;
                     //
                 }
-                
+
                 // aplica o dano
                 var damage:number = carB.applyDamage(carA.damage, criticalFactor);
 

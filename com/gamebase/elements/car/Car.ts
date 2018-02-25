@@ -36,6 +36,9 @@ module GameBase
             // se é um carro do jogador
             playerCar:boolean = false;
 
+            // barrinha de critico
+            gaude:Gaude.Gaude;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -146,6 +149,16 @@ module GameBase
                 // this.game.input.addMoveCallback(this.mouseDragMove, this);
                 // this.game.input.onUp.add(this.mouseDragEnd, this);
 
+                 // barra de clique
+                setTimeout(()=>{ 
+                    if(this.playerCar) // só cria se for carro de jogador
+                    {
+                        this.gaude = new Gaude.Gaude(this.game);
+                        this.gaude.build();
+                    }
+                }, 1000)
+
+
 
                 for (let i = 0; i < 2; i++) {
                     this.driveJoints[i].EnableMotor(true);
@@ -179,10 +192,16 @@ module GameBase
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             }
 
-            applyDamage(damageRange:[number, number], criticalFactor:number = 1):number
+            applyDamage(damageRange:[number, number], criticalFactor:number = NaN):number
             {
                 // randomiza o dano
                 var damage:number = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
+                
+                // se não veio predefinido, pega da barra, se existir
+                if(criticalFactor == NaN)
+                    criticalFactor = this.gaude ? this.gaude.hit() : 1;
+                //
+
                 damage *= criticalFactor; // critico
 
                 // anima, se for não for jogador
@@ -215,9 +234,6 @@ module GameBase
 
             update()
             {
-                    
-                // console.log('update', this.base.body.x, this.base.body.y)
-
                 this.bodySprite.x = this.base.body.x;
                 this.bodySprite.y = this.base.body.y;
 
