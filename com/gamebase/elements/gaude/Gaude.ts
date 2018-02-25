@@ -15,6 +15,7 @@ module GameBase
             bgTimer:Phaser.Sprite;
             timeInitialHeight:number;
             locked:boolean = false;
+            lockSpeed:number = 5;
 
             constructor(game:Pk.PkGame)
             {
@@ -128,7 +129,7 @@ module GameBase
                     return;
                 //
 
-                this.bgTimer.height -= 5;
+                this.bgTimer.height -= this.lockSpeed;
 
                 if(this.bgTimer.height <= 0)
                     this.lock();

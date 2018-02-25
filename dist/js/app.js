@@ -1407,6 +1407,7 @@ var GameBase;
                 _this.padding = 10;
                 _this.pushForce = -100;
                 _this.locked = false;
+                _this.lockSpeed = 5;
                 return _this;
             }
             Gaude.prototype.build = function () {
@@ -1483,7 +1484,7 @@ var GameBase;
                 if (this.bgTimer.height <= 0)
                     return;
                 //
-                this.bgTimer.height -= 5;
+                this.bgTimer.height -= this.lockSpeed;
                 if (this.bgTimer.height <= 0)
                     this.lock();
                 //
