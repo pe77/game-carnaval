@@ -857,37 +857,91 @@ var GameBase;
         var Battle = (function (_super) {
             __extends(Battle, _super);
             function Battle(game) {
-                return _super.call(this, game) || this;
+                var _this = _super.call(this, game) || this;
+                _this.battleEnd = false;
+                _this.lastHitTime = 0;
+                _this.resetCarsTolerance = 15;
+                _this.resetCarsInterval = 0;
+                return _this;
             }
-            Battle.prototype.setCars = function (carA, carB) {
-                // se já existe algum carro, destroi
-                if (this.cars && this.cars.length)
-                    for (var i in this.cars)
-                        this.cars[i].kill();
-                //
-                this.cars = [carA, carB];
-            };
-            Battle.prototype.start = function () {
+            Battle.prototype.start = function (carA, carB) {
                 var _this = this;
-                // se não houver carros, dropa
-                if (!this.cars.length)
-                    return false;
-                //
+                this.cars = [carA, carB];
                 // cria / posiciona
                 this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
                 this.cars[1].build(new Phaser.Point(this.game.world.width, this.game.world.height - 100), -1);
                 this.cars[0].name = 'carro 1';
                 // registra o evento
                 this.cars[0].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
-                    // console.log('carro 1 bateu');
+                    // se a batalha já terminou, foda-se o hit
+                    if (_this.battleEnd)
+                        return;
+                    //
+                    // um bate no outr
                     _this.carHit(_this.cars[0], _this.cars[1]);
-                }, this);
-                this.cars[1].event.add(GameBase.Car.E.CarEvent.OnHit, function (e, otherPlayer) {
-                    // console.log('carro 2 bateu');
                     _this.carHit(_this.cars[1], _this.cars[0]);
+                    // empurra eles em direção contraria
+                    _this.pushOff();
+                    // verifica se já terminou a batalha
+                    _this.resolve();
                 }, this);
+                this.resetCarsInterval = setInterval(function () {
+                    var lastHit = _this.game.time.totalElapsedSeconds() - _this.lastHitTime;
+                    if (lastHit > _this.resetCarsTolerance) {
+                        _this.pushOff();
+                        _this.pushOff();
+                        _this.pushOff();
+                    }
+                    console.log('ultim hit>', _this.game.time.totalElapsedSeconds() - _this.lastHitTime);
+                }, 1000);
+                // da uma empurrada
+                this.pushOff();
+                this.pushOff();
+            };
+            // empurra os carros em direção contraria
+            Battle.prototype.pushOff = function () {
+                console.log('pushOff!');
+                for (var i in this.cars)
+                    if (this.cars[i].alive)
+                        this.cars[i].base.body.applyForce(400 * -this.cars[i].direction, 300 / 2);
+                //
+            };
+            Battle.prototype.resolve = function () {
+                var winner = null; // se houve vencedor e qual
+                var playerCar = null;
+                // se terminou e quem ganhou
+                for (var i in this.cars) {
+                    if (!this.cars[i].partyBoysLeft())
+                        this.battleEnd = true;
+                    else
+                        winner = this.cars[i];
+                    //
+                    if (this.cars[i].playerCar)
+                        playerCar = this.cars[i];
+                    // 
+                }
+                // se a batalha terminou, 
+                if (this.battleEnd) {
+                    console.log('Battle end');
+                    // para a contage
+                    clearInterval(this.resetCarsInterval);
+                    for (var i in this.cars) {
+                        // destroi quem não é o vencedor
+                        if (!winner || this.cars[i].getId() != winner.getId())
+                            this.cars[i].kill();
+                        //
+                        // desliga o motor
+                        this.cars[i].engineOff();
+                        // da uma empurrada pra tras
+                        this.pushOff();
+                    }
+                    // dispara o evento de termino
+                    this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
+                }
+                //
             };
             Battle.prototype.carHit = function (carA, carB) {
+                this.lastHitTime = this.game.time.totalElapsedSeconds();
                 // pega o critico do gaude, se for carro do jogaro
                 var criticalFactor = 1;
                 if (carA.playerCar) {
@@ -905,15 +959,21 @@ var GameBase;
                 // calcula o impulso em cima do dano causado
                 var forceX = 750 + (300 * damage);
                 var forceY = -750 - (300 * damage);
+                // empurra de acordo com o dano
                 carB.base.body.applyForce(forceX * carA.direction, forceY);
-                // uma base força aplicada em si mesmo
-                carA.base.body.applyForce(300 * -carA.direction, 300 / 2);
                 // balança a camera
                 this.game.camera.shake(0.01, 100);
             };
             return Battle;
         }(Pk.PkElement));
         Battle_1.Battle = Battle;
+        var E;
+        (function (E) {
+            var BattleEvent;
+            (function (BattleEvent) {
+                BattleEvent.OnEnd = "BattleEventEnd";
+            })(BattleEvent = E.BattleEvent || (E.BattleEvent = {}));
+        })(E = Battle_1.E || (Battle_1.E = {}));
     })(Battle = GameBase.Battle || (GameBase.Battle = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
@@ -931,6 +991,7 @@ var GameBase;
                 _this.motorSpeed = 50;
                 _this.rideHeight = 0.8;
                 _this.direction = 1;
+                _this.alive = true;
                 _this.damage = [1, 2];
                 _this.driveJoints = [];
                 _this.name = '-nome padrão-';
@@ -961,13 +1022,13 @@ var GameBase;
                 this.sensor = this.base.body.addRectangle(this.size * 3, this.size, 0, this.size / 2 - this.size / 2);
                 this.sensor.SetSensor(true);
                 var PTM = this.size;
-                var tireSprite1 = this.game.add.sprite(0, 500, this.tireSpriteKey);
-                var tireSprite2 = this.game.add.sprite(0, 500, this.tireSpriteKey);
-                this.game.physics.box2d.enable(tireSprite1);
-                this.game.physics.box2d.enable(tireSprite2);
+                this.tireSprite1 = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                this.tireSprite2 = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                this.game.physics.box2d.enable(this.tireSprite1);
+                this.game.physics.box2d.enable(this.tireSprite2);
                 var wheelBodies = [];
-                wheelBodies[0] = tireSprite1.body;
-                wheelBodies[1] = tireSprite2.body;
+                wheelBodies[0] = this.tireSprite1.body;
+                wheelBodies[1] = this.tireSprite2.body;
                 wheelBodies[0].setCircle(0.4 * PTM);
                 wheelBodies[1].setCircle(0.4 * PTM);
                 this.driveJoints[0] = this.game.physics.box2d.wheelJoint(this.base.body, wheelBodies[0], -1 * PTM, this.rideHeight * PTM, 0, 0, 0, 1, this.frequency, this.damping, 0, this.motorTorque, true); // rear
@@ -1037,7 +1098,51 @@ var GameBase;
             Car.prototype.mouseDragEnd = function () {
                 this.game.physics.box2d.mouseDragEnd();
             };
+            Car.prototype.engineOn = function () {
+                for (var i in this.driveJoints)
+                    this.driveJoints[i].EnableMotor(true);
+                //
+            };
+            Car.prototype.engineOff = function () {
+                for (var i in this.driveJoints)
+                    this.driveJoints[i].EnableMotor(false);
+                //
+            };
             Car.prototype.kill = function () {
+                var _this = this;
+                // desliga os motores
+                this.engineOff();
+                // marca morto
+                this.alive = false;
+                var _loop_1 = function (i) {
+                    setTimeout(function () {
+                        console.log('desliga plat ' + i);
+                        _this.platforms[i].kill();
+                    }, 400 * parseInt(i));
+                };
+                // destroi as plataformas
+                for (var i in this.platforms) {
+                    _loop_1(i);
+                }
+                var _loop_2 = function (j) {
+                    setTimeout(function () {
+                        console.log('desliga roda ' + j);
+                        _this.game.physics.box2d.world.DestroyJoint(_this.driveJoints[j]);
+                    }, 200 * parseInt(j));
+                };
+                // destroi as rodas                
+                for (var j in this.driveJoints) {
+                    _loop_2(j);
+                }
+                this.addTween(this.bodySprite).to({
+                    alpha: 0
+                }, 5000, Phaser.Easing.Circular.Out, true).onComplete.add(function () {
+                    // some com as peças de vez
+                    _this.base.destroy();
+                    _this.bodySprite.destroy();
+                    _this.tireSprite1.destroy();
+                    _this.tireSprite2.destroy();
+                }, this);
                 // dispara o evento de morte
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             };
@@ -1045,7 +1150,7 @@ var GameBase;
                 if (criticalFactor === void 0) { criticalFactor = 1; }
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
-                damage *= criticalFactor; // critico
+                // damage *= criticalFactor; // critico
                 // anima, se for não for jogador
                 if (!this.playerCar || true) {
                     var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
@@ -1065,6 +1170,13 @@ var GameBase;
                     }
                 }
                 return damage;
+            };
+            Car.prototype.partyBoysLeft = function () {
+                var total = 0;
+                for (var i in this.platforms)
+                    total += this.platforms[i].partyBoys.length;
+                //
+                return total;
             };
             Car.prototype.update = function () {
                 this.bodySprite.x = this.base.body.x;
@@ -1232,24 +1344,15 @@ var GameBase;
                 }, 3000);
             };
             Platform.prototype.update = function () {
-                if (this.getId() == 7 || true) {
-                    // this.line.fromSprite(this.base.body, this.jointBody, false);
-                    // this.lineSprite.angle = this.line.angle;
-                    // this.lineGraph.rotation = this.line.angle;
-                    // this.line.start.y = this.line.start.x = 100;
-                    // this.line.end.y = this.line.end.x = 600;
-                    this.lineGraph.clear();
-                    this.lineGraph.lineStyle(4, 0x383a51, 1);
-                    this.lineGraph.moveTo(this.base.body.x, this.base.body.y); //moving position of graphic if you draw mulitple lines
-                    this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
-                    this.lineGraph.update();
-                    // this.lineGraph.angle = this.line.angle;
-                    this.base.bringToTop();
-                }
-                // this.bodySprite.x = this.base.x;
-                // this.bodySprite.y = this.base.y;
-                // this.line.fromSprite(this.base.body, this.jointBody, false);
-                // console.log('line:', this.line.angle)
+                this.lineGraph.clear();
+                if (this.death)
+                    return;
+                //
+                this.lineGraph.lineStyle(4, 0x383a51, 1);
+                this.lineGraph.moveTo(this.base.body.x, this.base.body.y); //moving position of graphic if you draw mulitple lines
+                this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
+                this.lineGraph.update();
+                this.base.bringToTop();
             };
             return Platform;
         }(Pk.PkElement));
@@ -1596,9 +1699,10 @@ var GameBase;
             var car2 = new GameBase.Car.CarD(this.game);
             car2.direction = -1;
             car2.name = 'Carro 2';
+            car1.damage = [100, 100];
+            car2.damage = [100, 100];
             // add os carros
-            this.battle.setCars(car1, car2);
-            this.battle.start();
+            this.battle.start(car1, car2);
         };
         Main.prototype.playSound = function () {
             // play music

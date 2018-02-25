@@ -5,6 +5,8 @@ module GameBase
         export class Car extends Pk.PkElement
         {
             base:Phaser.Sprite;
+            tireSprite1:Phaser.Sprite;
+            tireSprite2:Phaser.Sprite;
 
             size:number = 50;
             
@@ -14,6 +16,7 @@ module GameBase
             motorSpeed:number = 50;
             rideHeight:number = 0.8;
             direction:number = 1;
+            alive:boolean = true;
 
             damage:[number, number] = [1, 2];
 
@@ -70,15 +73,15 @@ module GameBase
                 
                 var PTM = this.size;
 
-                var tireSprite1:Phaser.Sprite = this.game.add.sprite(0, 500, this.tireSpriteKey);
-                var tireSprite2:Phaser.Sprite = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                this.tireSprite1 = this.game.add.sprite(0, 500, this.tireSpriteKey);
+                this.tireSprite2 = this.game.add.sprite(0, 500, this.tireSpriteKey);
 
-                this.game.physics.box2d.enable(tireSprite1);
-                this.game.physics.box2d.enable(tireSprite2);
+                this.game.physics.box2d.enable(this.tireSprite1);
+                this.game.physics.box2d.enable(this.tireSprite2);
 
                 var wheelBodies = [];
-                wheelBodies[0] = tireSprite1.body;
-                wheelBodies[1] = tireSprite2.body;
+                wheelBodies[0] = this.tireSprite1.body;
+                wheelBodies[1] = this.tireSprite2.body;
                 wheelBodies[0].setCircle(0.4*PTM);
                 wheelBodies[1].setCircle(0.4*PTM);
                 
@@ -186,8 +189,63 @@ module GameBase
                 
             }
 
+            engineOn()
+            {
+                for(var i in this.driveJoints)
+                    this.driveJoints[i].EnableMotor(true);
+                //
+            }
+
+            engineOff()
+            {
+                for(var i in this.driveJoints)
+                    this.driveJoints[i].EnableMotor(false);
+                //
+            }
+
             kill()
             {
+                // desliga os motores
+                this.engineOff();
+
+                // marca morto
+                this.alive = false;
+
+                // destroi as plataformas
+                for(let i in this.platforms)
+                {
+                    setTimeout(()=>{
+                        console.log('desliga plat ' + i)
+                        this.platforms[i].kill()
+                    }, 400*parseInt(i));
+                }
+
+                // destroi as rodas                
+                for(let j in this.driveJoints)
+                {
+                    setTimeout(()=>{
+                        console.log('desliga roda ' + j)
+                        this.game.physics.box2d.world.DestroyJoint(this.driveJoints[j]);
+                    }, 200*parseInt(j));
+                }
+
+                this.addTween(this.bodySprite).to(
+                    {
+                        alpha:0
+                    }, 
+                    5000, 
+                    Phaser.Easing.Circular.Out, 
+                    true
+                ).onComplete.add(()=>{
+                    // some com as peças de vez
+                    this.base.destroy();
+                    this.bodySprite.destroy();
+                    this.tireSprite1.destroy();
+                    this.tireSprite2.destroy();
+                }, this);
+
+
+
                 // dispara o evento de morte
                 this.event.dispatch(GameBase.Car.E.CarEvent.OnKill);
             }
@@ -197,7 +255,7 @@ module GameBase
                 // randomiza o dano
                 var damage:number = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
                 
-                damage *= criticalFactor; // critico
+                // damage *= criticalFactor; // critico
 
                 // anima, se for não for jogador
                 if(!this.playerCar || true) // deixa pra lá
@@ -225,6 +283,17 @@ module GameBase
                
 
                 return damage;
+            }
+
+            partyBoysLeft():number
+            {
+                var total:number = 0;
+
+                for(var i in this.platforms)
+                    total += this.platforms[i].partyBoys.length;
+                //
+
+                return total;
             }
 
             update()

@@ -50,9 +50,11 @@ module GameBase
 			car2.direction = -1;
 			car2.name = 'Carro 2';
 
+			car1.damage = [100, 100]
+			car2.damage = [100, 100]
+
 			// add os carros
-			this.battle.setCars(car1, car2);
-			this.battle.start();
+			this.battle.start(car1, car2);
 		}
 
 		playSound()

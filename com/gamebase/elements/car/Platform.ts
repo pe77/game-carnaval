@@ -124,36 +124,18 @@ module GameBase
 
             update()
             {
-                
-                if(this.getId() == 7 || true)
-                {
-                    // this.line.fromSprite(this.base.body, this.jointBody, false);
-                    
-                    
-                    // this.lineSprite.angle = this.line.angle;
-                    // this.lineGraph.rotation = this.line.angle;
+                this.lineGraph.clear();
 
-                    // this.line.start.y = this.line.start.x = 100;
-                    // this.line.end.y = this.line.end.x = 600;
+                if(this.death)
+                    return;
+                //
 
-                    this.lineGraph.clear();
-                    this.lineGraph.lineStyle(4, 0x383a51, 1);
-                    this.lineGraph.moveTo(this.base.body.x, this.base.body.y);//moving position of graphic if you draw mulitple lines
-                    this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
-                    this.lineGraph.update();
+                this.lineGraph.lineStyle(4, 0x383a51, 1);
+                this.lineGraph.moveTo(this.base.body.x, this.base.body.y);//moving position of graphic if you draw mulitple lines
+                this.lineGraph.lineTo(this.jointBody.x, this.jointBody.y);
+                this.lineGraph.update();
 
-
-                    // this.lineGraph.angle = this.line.angle;
-
-                    this.base.bringToTop();
-
-                }
-                // this.bodySprite.x = this.base.x;
-                // this.bodySprite.y = this.base.y;
-                
-                // this.line.fromSprite(this.base.body, this.jointBody, false);
-
-                // console.log('line:', this.line.angle)
+                this.base.bringToTop();
             }
 
 
