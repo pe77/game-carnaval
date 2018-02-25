@@ -45,7 +45,8 @@ module GameBase
                     this.carHit(this.cars[1], this.cars[0]);
 
                     // empurra eles em direção contraria
-                    this.pushOff()
+                    this.pushOff();
+                    this.pushOff();
 
                     // verifica se já terminou a batalha
                     this.resolve();

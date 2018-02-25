@@ -896,6 +896,7 @@ var GameBase;
                     _this.carHit(_this.cars[1], _this.cars[0]);
                     // empurra eles em direção contraria
                     _this.pushOff();
+                    _this.pushOff();
                     // verifica se já terminou a batalha
                     _this.resolve();
                 }, this);
@@ -1405,6 +1406,7 @@ var GameBase;
                 var _this = _super.call(this, game) || this;
                 _this.padding = 10;
                 _this.pushForce = -100;
+                _this.locked = false;
                 return _this;
             }
             Gaude.prototype.build = function () {
@@ -1413,6 +1415,11 @@ var GameBase;
                 this.add(this.bg);
                 this.mark = this.game.add.sprite(0, 0, 'gaude-mark');
                 this.add(this.mark);
+                this.bgTimer = Pk.PkUtils.createSquare(this.game, 5, this.bg.height, "#69a53c");
+                this.add(this.bgTimer);
+                this.bgTimer.anchor.set(0, 1);
+                this.bgTimer.y += this.bgTimer.height;
+                this.timeInitialHeight = this.bgTimer.height;
                 this.button = this.game.add.sprite(0, 0, 'gaude-button');
                 this.add(this.button);
                 this.button.anchor.x = 0.5;
@@ -1440,26 +1447,11 @@ var GameBase;
                 this.game.physics.box2d.prismaticJoint(graber, this.mark, 0, 1, 0, 0, 0, 0, 0, 0, false, 0, this.bg.height + 10, true);
                 this.x = this.padding;
                 this.y = this.padding;
-                /*
-                    0
-                        0
-                    0-18
-                        5
-                    18-34
-                        0
-                    34-69
-                        3
-                    69-104
-                        2
-                    104-164
-                        1
-                    164-250
-                        0
-                    250
-                */
             };
             Gaude.prototype.push = function () {
-                this.mark.body.applyForce(0, this.pushForce);
+                if (!this.locked)
+                    this.mark.body.applyForce(0, this.pushForce);
+                //
             };
             Gaude.prototype.hit = function () {
                 var hitValue = 0;
@@ -1484,7 +1476,35 @@ var GameBase;
                 iconUp.x = this.x + this.mark.width / 2;
                 iconUp.y = this.mark.body.y;
                 iconUp.go();
+                this.unlock();
                 return hitValue;
+            };
+            Gaude.prototype.update = function () {
+                if (this.bgTimer.height <= 0)
+                    return;
+                //
+                this.bgTimer.height -= 5;
+                if (this.bgTimer.height <= 0)
+                    this.lock();
+                //
+            };
+            Gaude.prototype.unlock = function () {
+                this.locked = false;
+                this.bgTimer.height = this.timeInitialHeight;
+                this.mark.body.gravityScale = 1;
+            };
+            Gaude.prototype.lock = function () {
+                this.locked = true;
+                // this.mark.body.
+                var a;
+                this.mark.body.velocity.y = 0;
+                this.mark.body.gravityScale = 0;
+                // anima
+                var iconUp = new GameBase.Gaude.Icon(this.game, '* Lock *');
+                iconUp.create();
+                iconUp.x = this.x + this.mark.width / 2;
+                iconUp.y = this.mark.body.y;
+                iconUp.go();
             };
             return Gaude;
         }(Pk.PkElement));

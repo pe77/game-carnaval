@@ -12,6 +12,9 @@ module GameBase
             padding:number = 10;
             pushForce:number = -100;
             
+            bgTimer:Phaser.Sprite;
+            timeInitialHeight:number;
+            locked:boolean = false;
 
             constructor(game:Pk.PkGame)
             {
@@ -25,6 +28,13 @@ module GameBase
 
                 this.mark = this.game.add.sprite(0, 0, 'gaude-mark');
                 this.add(this.mark);
+
+                this.bgTimer = Pk.PkUtils.createSquare(this.game, 5, this.bg.height, "#69a53c")
+                this.add(this.bgTimer)
+
+                this.bgTimer.anchor.set(0, 1);
+                this.bgTimer.y += this.bgTimer.height;
+                this.timeInitialHeight = this.bgTimer.height;
 
                 this.button = this.game.add.sprite(0, 0, 'gaude-button');
                 this.add(this.button);
@@ -63,29 +73,13 @@ module GameBase
                 this.x = this.padding;
                 this.y = this.padding;
 
-                /*
-                    0
-                        0
-                    0-18
-                        5
-                    18-34
-                        0
-                    34-69
-                        3
-                    69-104
-                        2
-                    104-164
-                        1
-                    164-250
-                        0
-                    250
-                */ 
-
             }
 
             push()
             {
-                this.mark.body.applyForce(0, this.pushForce);
+                if(!this.locked)
+                    this.mark.body.applyForce(0, this.pushForce);
+                //
             }
 
             hit():number
@@ -123,9 +117,52 @@ module GameBase
 
                 iconUp.go();
 
+                this.unlock();
+
                 return hitValue;
             }
 
+            update()
+            {
+                if(this.bgTimer.height <= 0)
+                    return;
+                //
+
+                this.bgTimer.height -= 5;
+
+                if(this.bgTimer.height <= 0)
+                    this.lock();
+                //
+            }
+
+            unlock()
+            {
+                this.locked = false;
+
+                this.bgTimer.height = this.timeInitialHeight;
+                this.mark.body.gravityScale = 1;
+            }
+
+            lock()
+            {
+                this.locked = true;
+
+                // this.mark.body.
+                var a:Phaser.Physics.Box2D.Body;
+
+                this.mark.body.velocity.y = 0;
+                this.mark.body.gravityScale = 0;
+
+                // anima
+                var iconUp:Gaude.Icon = new GameBase.Gaude.Icon(this.game, '* Lock *');
+                iconUp.create();
+                iconUp.x = this.x + this.mark.width / 2;
+                iconUp.y = this.mark.body.y;
+
+                iconUp.go();
+
+                
+            }
 
         }
     }
