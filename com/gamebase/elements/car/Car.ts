@@ -45,6 +45,9 @@ module GameBase
             // barrinha de critico
             gaude:Gaude.Gaude;
 
+            // sfx
+            audioHit:Phaser.Sound;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -171,6 +174,9 @@ module GameBase
                     this.driveJoints[i].SetMotorSpeed(this.motorSpeed * this.direction);
                 }
 
+
+                // audio hit
+                this.audioHit = this.game.add.audio('car-sfx-hit');
                 
             }
 
@@ -284,6 +290,10 @@ module GameBase
                         }
                     }
                 }
+
+                if(!this.playerCar)
+                    this.audioHit.play('', 0, 0.5);
+                //
                
 
                 return damage;

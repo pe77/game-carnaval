@@ -611,15 +611,9 @@ var GameBase;
             // intro
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
-            /*
-            for (var i = 0; i < 6; i++)
-                this.load.image('partyboy-' + (i+1), 'assets/default/car/f'+(i+1)+'.png');
-            //
-            */
             for (var i = 0; i < 14; i++) {
                 var index = (i + 1);
                 index = index < 10 ? '0' + index : index;
-                console.log('PB index:', index);
                 this.load.image('partyboy-' + (i + 1), 'assets/default/car/Foliao_' + index + '.png');
             }
             //
@@ -647,6 +641,11 @@ var GameBase;
             this.load.image('car-d-tire', 'assets/default/car/d/tire.png');
             this.load.image('car-d-body', 'assets/default/car/d/body.png');
             this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
+            // car hit
+            this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
+            this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
+            this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
+            this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -869,7 +868,7 @@ var GameBase;
                 var _this = _super.call(this, game) || this;
                 _this.battleEnd = false;
                 _this.lastHitTime = 0;
-                _this.resetCarsTolerance = 15;
+                _this.resetCarsTolerance = 10;
                 _this.resetCarsInterval = 0;
                 return _this;
             }
@@ -908,7 +907,7 @@ var GameBase;
                 }, 1000);
                 this.lastHitTime = 0;
                 // da uma empurrada
-                for (var index = 0; index < 10; index++) {
+                for (var index = 0; index < 5; index++) {
                     this.pushOff();
                     this.pushOff();
                 }
@@ -921,7 +920,6 @@ var GameBase;
             };
             // empurra os carros em direção contraria
             Battle.prototype.pushOff = function () {
-                console.log('pushOff!');
                 for (var i in this.cars)
                     if (this.cars[i].alive)
                         this.cars[i].base.body.applyForce(400 * -this.cars[i].direction, 300 / 2);
@@ -929,7 +927,6 @@ var GameBase;
                 this.lastHitTime = 0;
             };
             Battle.prototype.resolve = function () {
-                var _this = this;
                 var winner = null; // se houve vencedor e qual
                 var playerCar = null;
                 // se terminou e quem ganhou
@@ -964,8 +961,9 @@ var GameBase;
                     deadCar.event.add(GameBase.Car.E.CarEvent.OnKill, function () {
                         console.log('Carro ' + deadCar.name, ' terminou de se destruir');
                         // dispara o evento de termino
-                        _this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
+                        // this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
                     }, this);
+                    this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
                 }
                 //
             };
@@ -1115,6 +1113,8 @@ var GameBase;
                     this.driveJoints[i_2].EnableMotor(true);
                     this.driveJoints[i_2].SetMotorSpeed(this.motorSpeed * this.direction);
                 }
+                // audio hit
+                this.audioHit = this.game.add.audio('car-sfx-hit');
             };
             Car.prototype.mouseDragStart = function () {
                 this.game.physics.box2d.mouseDragStart(this.game.input.mousePointer);
@@ -1196,6 +1196,9 @@ var GameBase;
                         }
                     }
                 }
+                if (!this.playerCar)
+                    this.audioHit.play('', 0, 0.5);
+                //
                 return damage;
             };
             Car.prototype.partyBoysLeft = function () {
@@ -1573,7 +1576,7 @@ var GameBase;
                 this.body = this.base.body;
                 this.body.sensor = true;
                 this.body.mass = 0.1;
-                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height / 2) + 10, 0, this.base.height / 2, 3, 0.3);
+                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height / 2) + 13, 0, this.base.height / 2, 3, 0.3);
             };
             PartyBoy.prototype.kill = function () {
                 var _this = this;
@@ -1754,10 +1757,21 @@ var GameBase;
                     console.log('Empate');
                 //
                 // se o jogador ganhou, começa a proxima batalha
-                if (winner && winner.getId() == _this.playerCar.getId())
-                    _this.nextBattle();
-                //
+                if (winner && winner.getId() == _this.playerCar.getId()) {
+                    setTimeout(function () {
+                        _this.nextBattle();
+                    }, 3000);
+                }
+                else {
+                    _this.lose();
+                }
+                //	
             }, this);
+            // musica de fundo 
+            this.musicBG = this.game.add.audio('audio-battle-bg');
+            // registra os sfx
+            this.audioWin = this.game.add.audio('audio-battle-win');
+            this.audioLose = this.game.add.audio('audio-battle-lose');
             // começa as paradas
             this.nextBattle();
         };
@@ -1777,9 +1791,20 @@ var GameBase;
                 console.log(this.playerCar.name, ':: x ::', this.enemies[i].name);
                 this.battle.start(this.playerCar, nextEnemy);
             }
-            else {
-                alert('GANHOU, SEU LINDO!');
-            }
+            else
+                this.win();
+            //
+            // se a musica de fundo não estiver rolando, roda
+            if (!this.musicBG.isPlaying)
+                this.musicBG.play('', 0, 1.0, true);
+            //
+        };
+        Main.prototype.win = function () {
+            this.audioWin.play('', 0, 0.7);
+        };
+        Main.prototype.lose = function () {
+            this.musicBG.fadeOut(200);
+            this.audioLose.fadeIn(200);
         };
         Main.prototype.playSound = function () {
             // play music

@@ -14,6 +14,12 @@ module GameBase
 		playerCar:Car.Car;
 		enemies:Array<Car.Car> = [];
 
+		musicBG:Phaser.Sound;
+
+
+		audioWin:Phaser.Sound;
+		audioLose:Phaser.Sound;
+
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
@@ -78,13 +84,30 @@ module GameBase
 
 				// se o jogador ganhou, começa a proxima batalha
 				if(winner && winner.getId() == this.playerCar.getId())
-					this.nextBattle();
-				//
+				{
+					setTimeout(()=>{
+						this.nextBattle();
+					}, 3000)
+					
+				}
+				else
+				{
+					this.lose();
+				}
+					
+				//	
 
 			}, this);
 
+			// musica de fundo 
+			this.musicBG = this.game.add.audio('audio-battle-bg');
+
+			// registra os sfx
+			this.audioWin 	= this.game.add.audio('audio-battle-win');
+			this.audioLose 	= this.game.add.audio('audio-battle-lose');
+
 			// começa as paradas
-			this.nextBattle()
+			this.nextBattle();
 		}
 
 		nextBattle()
@@ -109,11 +132,26 @@ module GameBase
 			{
 				console.log(this.playerCar.name, ':: x ::', this.enemies[i].name);
 				this.battle.start(this.playerCar, nextEnemy);
-			}else{
-				alert('GANHOU, SEU LINDO!')
-			}
+			}else
+				this.win();
+			//
+
 			
-			
+			// se a musica de fundo não estiver rolando, roda
+			if(!this.musicBG.isPlaying)
+				this.musicBG.play('', 0, 1.0, true);
+			//
+		}
+
+		win()
+		{
+			this.audioWin.play('', 0, 0.7);
+		}
+
+		lose()
+		{
+			this.musicBG.fadeOut(200);
+			this.audioLose.fadeIn(200);
 		}
 
 		playSound()

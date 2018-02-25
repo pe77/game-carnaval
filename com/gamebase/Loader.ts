@@ -76,17 +76,11 @@ module GameBase {
             this.load.image('intro-jam', 'assets/states/intro/images/jam.png');
             this.load.image('intro-phaser', 'assets/states/intro/images/phaser.png');
 
-            /*
-            for (var i = 0; i < 6; i++)
-                this.load.image('partyboy-' + (i+1), 'assets/default/car/f'+(i+1)+'.png');    
-            //
-            */
 
             for (var i = 0; i < 14; i++)
             {
                 var index:any = (i+1);
                 index = index < 10 ? '0' + index : index;
-                console.log('PB index:', index);
                 this.load.image('partyboy-' + (i+1), 'assets/default/car/Foliao_' + index + '.png');    
             }
             //
@@ -121,6 +115,12 @@ module GameBase {
             this.load.image('car-d-body', 'assets/default/car/d/body.png');
             this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
 
+            // car hit
+            this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
+
+            this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
+            this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
+            this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

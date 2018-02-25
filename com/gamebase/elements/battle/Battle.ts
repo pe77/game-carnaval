@@ -8,7 +8,7 @@ module GameBase
             battleEnd:boolean = false;
 
             lastHitTime:number = 0;
-            resetCarsTolerance:number = 15;
+            resetCarsTolerance:number = 10;
             resetCarsInterval:number = 0;
 
             constructor(game:Pk.PkGame)
@@ -66,7 +66,7 @@ module GameBase
                 this.lastHitTime = 0;
 
                 // da uma empurrada
-                for (var index = 0; index < 10; index++) {
+                for (var index = 0; index < 5; index++) {
                     this.pushOff();
                     this.pushOff();
                 }
@@ -85,7 +85,6 @@ module GameBase
             // empurra os carros em direção contraria
             pushOff()
             {
-                console.log('pushOff!')
                 for(var i in this.cars)
                     if(this.cars[i].alive)
                         this.cars[i].base.body.applyForce(400*-this.cars[i].direction, 300/2);
@@ -144,10 +143,11 @@ module GameBase
                         console.log('Carro ' + deadCar.name, ' terminou de se destruir');
                         
                         // dispara o evento de termino
-                        this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
+                        // this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
 
                     }, this);
 
+                    this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
                     
                 }
                     

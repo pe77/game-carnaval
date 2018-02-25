@@ -29,7 +29,7 @@ module GameBase
                 this.body.sensor = true;
                 this.body.mass = 0.1;
                 
-                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height/2) + 10, 0, this.base.height / 2, 3, 0.3);
+                this.joint = this.game.physics.box2d.weldJoint(platformBody, this.body, position, -(this.base.height/2) + 13, 0, this.base.height / 2, 3, 0.3);
             }
 
             kill()
