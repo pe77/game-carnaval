@@ -64,7 +64,7 @@ module GameBase
 			this.playerCar = new Car.CarE(this.game);
 			this.playerCar.playerCar = true;
 			this.playerCar.name = 'Carro 1';
-			this.playerCar.damage = [100, 100];
+			// this.playerCar.damage = [100, 100];
 
 			// inimigos
 			var enemy0 = new Car.CarA(this.game);
@@ -84,9 +84,9 @@ module GameBase
 			enemy3.name = 'Inimigo 3';
 
 			this.enemies.push(enemy0);
-			// this.enemies.push(enemy1);
-			// this.enemies.push(enemy2);
-			// this.enemies.push(enemy3);
+			this.enemies.push(enemy1);
+			this.enemies.push(enemy2);
+			this.enemies.push(enemy3);
 
 
 

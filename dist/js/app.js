@@ -2049,7 +2049,7 @@ var GameBase;
             this.playerCar = new GameBase.Car.CarE(this.game);
             this.playerCar.playerCar = true;
             this.playerCar.name = 'Carro 1';
-            this.playerCar.damage = [100, 100];
+            // this.playerCar.damage = [100, 100];
             // inimigos
             var enemy0 = new GameBase.Car.CarA(this.game);
             enemy0.direction = -1;
@@ -2064,9 +2064,9 @@ var GameBase;
             enemy3.direction = -1;
             enemy3.name = 'Inimigo 3';
             this.enemies.push(enemy0);
-            // this.enemies.push(enemy1);
-            // this.enemies.push(enemy2);
-            // this.enemies.push(enemy3);
+            this.enemies.push(enemy1);
+            this.enemies.push(enemy2);
+            this.enemies.push(enemy3);
             // particulas
             // scene particles
             var front_emitter = this.game.add.emitter(this.game.world.width, -32, 600);
