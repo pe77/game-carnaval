@@ -172,8 +172,40 @@ module GameBase
 				
 			}, this);
 
-			// começa as paradas
-			this.nextBattle();
+			this.startScreen()
+
+
+			this.musicBG.play('', 0, 1.0, true);
+		}
+
+		startScreen()
+		{
+			var endScreen:Phaser.Sprite = this.game.add.sprite(0, 0, 'game-start');
+			endScreen.anchor.set(0.5, 0.5);
+
+			endScreen.x = this.game.world.centerX;
+			endScreen.y = this.game.world.centerY - 80;
+
+			
+			this.game.add.tween(endScreen).from(
+				{
+					alpha:0
+				}, 
+				1500, 
+				Phaser.Easing.Circular.In, 
+				true
+			);
+			
+
+			endScreen.inputEnabled = true;
+            endScreen.input.useHandCursor = true;
+
+			endScreen.events.onInputDown.add(()=>{
+				// começa as paradas
+				this.nextBattle();
+
+				endScreen.visible = false;
+			}, this);
 		}
 
 		nextBattle()
@@ -188,11 +220,6 @@ module GameBase
 				this.battle.start(this.playerCar, nextEnemy); // começa
 			//
 
-			
-			// se a musica de fundo não estiver rolando, roda
-			if(!this.musicBG.isPlaying)
-				this.musicBG.play('', 0, 1.0, true);
-			//
 		}
 
 		getNextEnemy():Car.Car

@@ -658,6 +658,7 @@ var GameBase;
             this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
             this.load.image('game-end-win', 'assets/states/main/images/end-victory.png');
             this.load.image('game-end-lose', 'assets/states/main/images/end-lose.png');
+            this.load.image('game-start', 'assets/states/main/images/start.png');
             // particula
             this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
             this.load.image('particle-2', 'assets/states/main/images/particles/p2.png');
@@ -2129,8 +2130,25 @@ var GameBase;
                 // espera um pouco e toca o proximo
                 _this.nextBattle();
             }, this);
-            // começa as paradas
-            this.nextBattle();
+            this.startScreen();
+            this.musicBG.play('', 0, 1.0, true);
+        };
+        Main.prototype.startScreen = function () {
+            var _this = this;
+            var endScreen = this.game.add.sprite(0, 0, 'game-start');
+            endScreen.anchor.set(0.5, 0.5);
+            endScreen.x = this.game.world.centerX;
+            endScreen.y = this.game.world.centerY - 80;
+            this.game.add.tween(endScreen).from({
+                alpha: 0
+            }, 1500, Phaser.Easing.Circular.In, true);
+            endScreen.inputEnabled = true;
+            endScreen.input.useHandCursor = true;
+            endScreen.events.onInputDown.add(function () {
+                // começa as paradas
+                _this.nextBattle();
+                endScreen.visible = false;
+            }, this);
         };
         Main.prototype.nextBattle = function () {
             console.log('-- NEXT BATTLE -- ');
@@ -2139,10 +2157,6 @@ var GameBase;
             // se existir outro inimigo
             if (nextEnemy)
                 this.battle.start(this.playerCar, nextEnemy); // começa
-            //
-            // se a musica de fundo não estiver rolando, roda
-            if (!this.musicBG.isPlaying)
-                this.musicBG.play('', 0, 1.0, true);
             //
         };
         Main.prototype.getNextEnemy = function () {

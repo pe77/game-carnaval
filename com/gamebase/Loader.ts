@@ -137,6 +137,7 @@ module GameBase {
 
             this.load.image('game-end-win', 'assets/states/main/images/end-victory.png');
             this.load.image('game-end-lose', 'assets/states/main/images/end-lose.png');
+            this.load.image('game-start', 'assets/states/main/images/start.png');
 
             // particula
             this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
