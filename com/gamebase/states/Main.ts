@@ -21,6 +21,9 @@ module GameBase
 		audioLose:Phaser.Sound;
 
 
+		upgradeScreen:UpgradeScreen.UpgradeScreen
+
+
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
@@ -58,12 +61,16 @@ module GameBase
 			this.battle = new Battle.Battle(this.game);
 
 			// carro do jogador
-			this.playerCar = new Car.CarA(this.game);
+			this.playerCar = new Car.CarE(this.game);
 			this.playerCar.playerCar = true;
 			this.playerCar.name = 'Carro 1';
 			// this.playerCar.damage = [100, 100];
 
 			// inimigos
+			var enemy0 = new Car.CarA(this.game);
+			enemy0.direction = -1;
+			enemy0.name = 'Inimigo 0';
+
 			var enemy1 = new Car.CarB(this.game);
 			enemy1.direction = -1;
 			enemy1.name = 'Inimigo 1';
@@ -76,6 +83,7 @@ module GameBase
 			enemy3.direction = -1;
 			enemy3.name = 'Inimigo 3';
 
+			this.enemies.push(enemy0);
 			this.enemies.push(enemy1);
 			this.enemies.push(enemy2);
 			this.enemies.push(enemy3);
@@ -92,9 +100,8 @@ module GameBase
 				// se o jogador ganhou, começa a proxima batalha
 				if(winner && winner.getId() == this.playerCar.getId())
 				{
-					setTimeout(()=>{
-						this.nextBattle();
-					}, 3000)
+					// abre o seletor de upgrade
+					this.upgradeScreen.open();
 					
 				}
 				else
@@ -115,6 +122,33 @@ module GameBase
 
 			// começa as paradas
 			this.nextBattle();
+
+			this.upgradeScreen = new UpgradeScreen.UpgradeScreen(this.game);
+			this.upgradeScreen.create();
+			this.upgradeScreen.event.add(GameBase.UpgradeScreen.E.UpgradeEvent.OnSelect, (e, data)=>{
+
+				// aplica o upgrade no carro 
+				switch(data)
+				{
+					case 1:
+						console.log('UPGRADE ATAQUE')
+						this.playerCar.upgradeAttack(); 
+						break;
+
+					case 2:
+						console.log('UPGRADE DEFESA')
+						this.playerCar.upgradeDefense(); 
+						break;
+
+					case 3:
+						console.log('UPGRADE MINIONS')
+						this.playerCar.upgradeHealth();
+						break;
+				}
+
+				// da o upgrade no carro
+				this.nextBattle();
+			}, this)
 		}
 
 		nextBattle()

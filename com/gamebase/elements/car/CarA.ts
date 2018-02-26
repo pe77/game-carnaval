@@ -14,7 +14,7 @@ module GameBase
                 this.platformSpriteKey  = 'car-a-platform';
                 this.tireSpriteKey      = 'car-a-tire';
 
-                this.damage             = [1,5];
+                this.damage             = [2,2];
             }
 
         }

@@ -11,6 +11,8 @@ module GameBase
             resetCarsTolerance:number = 10;
             resetCarsInterval:number = 0;
 
+            battleCount:number = 0;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -22,6 +24,8 @@ module GameBase
                 this.cars = [carA, carB];
                 
                 console.log('construindo carros')
+
+                this.battleCount++;
 
                 // cria / posiciona
                 if(!this.cars[0].builded)
@@ -74,10 +78,19 @@ module GameBase
                 
 
 
-                // liga os MOTOREEEEESS
+                // liga os MOTOREEEEESS e reseta o gaude
                 for(var i in this.cars)
+                {
+                    if(this.cars[i].gaude)
+                        this.cars[i].gaude.reset();
+                    //
+
+                    // motores
                     this.cars[i].engineOn();
+                }
+                    
                 //
+                
 
                 // reseta a flag de termino de batalha
                 this.battleEnd = false;
@@ -136,21 +149,18 @@ module GameBase
                         // desliga o motor
                         this.cars[i].engineOff();
 
+                        // para o gaude, se houver
+                        if(this.cars[i].gaude)
+                            this.cars[i].gaude.stop();
+                        //
+
                         // da uma empurrada pra tras
                         this.pushOff();
                     }
 
-                    deadCar.event.add(Car.E.CarEvent.OnKill, ()=>{
-                        console.log('Carro ' + deadCar.name, ' terminou de se destruir');
-                        
-                        // dispara o evento de termino
-                        // this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
-
-                    }, this);
-
                     this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
                     
-                }
+                }   
                     
                 //
             }

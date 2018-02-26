@@ -15,7 +15,9 @@ module GameBase
             bgTimer:Phaser.Sprite;
             timeInitialHeight:number;
             locked:boolean = false;
-            lockSpeed:number = 5;
+            lockSpeed:number = 3;
+
+            run:boolean = true;
 
             constructor(game:Pk.PkGame)
             {
@@ -125,7 +127,7 @@ module GameBase
 
             update()
             {
-                if(this.bgTimer.height <= 0)
+                if(this.bgTimer.height <= 0 || !this.run)
                     return;
                 //
 
@@ -134,6 +136,19 @@ module GameBase
                 if(this.bgTimer.height <= 0)
                     this.lock();
                 //
+            }
+
+            stop()
+            {
+                this.run = false;
+            }
+
+            reset()
+            {
+                console.log('Gaude Reset')
+                this.run = true;
+                this.unlock();
+                this.push();
             }
 
             unlock()

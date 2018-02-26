@@ -115,6 +115,11 @@ module GameBase {
             this.load.image('car-d-body', 'assets/default/car/d/body.png');
             this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
 
+            // E
+            this.load.image('car-e-tire', 'assets/default/car/e/tire.png');
+            this.load.image('car-e-body', 'assets/default/car/e/body.png');
+            this.load.image('car-e-platform', 'assets/default/car/e/platform.png');
+
             // car hit
             this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
 
@@ -124,6 +129,11 @@ module GameBase {
 
             // scene
             this.load.image('main-bg', 'assets/states/main/bg.jpg');
+
+            this.load.image('upg-header', 'assets/default/upgrade/header.png');
+            this.load.image('upg-btn-attack', 'assets/default/upgrade/attack.png');
+            this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
+            this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

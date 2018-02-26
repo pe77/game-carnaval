@@ -13,6 +13,8 @@ module GameBase
                 this.bodySpriteKey      = 'car-b-body';
                 this.platformSpriteKey  = 'car-b-platform';
                 this.tireSpriteKey      = 'car-b-tire';
+
+                this.defense = 2;
             }
 
         }

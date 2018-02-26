@@ -14,6 +14,9 @@ module GameBase
                 this.platformSpriteKey  = 'car-d-platform';
                 this.tireSpriteKey      = 'car-d-tire';
                 this.platformsTotal     = 4;
+
+                this.defense = 3;
+                this.damage = [2, 4];
             }
 
         }

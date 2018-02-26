@@ -48,6 +48,8 @@ module GameBase
             // sfx
             audioHit:Phaser.Sound;
 
+            defense:number = 1;
+
             constructor(game:Pk.PkGame)
             {
                 super(game);
@@ -271,6 +273,21 @@ module GameBase
                 
                 damage *= criticalFactor; // critico
 
+                // subtrai a defesa
+                // 10-(0.3 * 10)
+                console.log('DAMAGE A', damage, this.defense);
+                damage = damage - ((this.defense * 0.1) * damage);
+                damage = parseInt(damage.toString());
+                
+
+                // garante ao menos um de dano no caso de não crit x 0
+                if(criticalFactor > 0 && damage <= 0)
+                    damage = 1;
+                //
+
+                console.log('DAMAGE B', damage);
+
+
                 var iconUp:Icon.Icon = new Icon.Icon(this.game, '-' + damage);
                 iconUp.create();
                 iconUp.x = this.base.body.x - this.base.width / 2;
@@ -320,6 +337,53 @@ module GameBase
 
                 this.bodySprite.bringToTop();
             }
+
+            upgradeAttack(value:number = 1)
+            {
+                this.damage = [this.damage[0]+value, this.damage[1]+value];
+                console.log('this.damage:', this.damage)
+            }
+
+            upgradeDefense(value:number = 2)
+            {
+                this.defense += value;
+                console.log('this.defense:', this.defense)
+            }
+
+            upgradeHealth(value:number = 3)
+            {
+                // seleciona uma plataforma que tenha espaço pra folião
+                for(let i = this.platforms.length - 1; i >=0 ;i--)
+                {    
+                    // espaço disponivel
+                    var slot:number = this.platforms[i].partyBoysMax - this.platforms[i].partyBoys.length;
+
+                    if(value <= 0)
+                        return;
+                    //
+
+                    if(slot > 0) // se ainda cabe
+                    {
+                        var countTotal = value;
+                        for (var j = 0; j < slot; j++)
+                        {
+                            var pb:PartyBoy.PartyBoy = new PartyBoy.PartyBoy(this.game);
+                            pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+
+                            // add
+                            this.platforms[i].addPartyBoys(pb)
+
+                            value--;
+
+                            if(value <= 0)
+                                return;
+                            //
+                        }
+                    }
+                }
+            }
+
+
         }
 
 

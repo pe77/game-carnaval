@@ -641,6 +641,10 @@ var GameBase;
             this.load.image('car-d-tire', 'assets/default/car/d/tire.png');
             this.load.image('car-d-body', 'assets/default/car/d/body.png');
             this.load.image('car-d-platform', 'assets/default/car/d/platform.png');
+            // E
+            this.load.image('car-e-tire', 'assets/default/car/e/tire.png');
+            this.load.image('car-e-body', 'assets/default/car/e/body.png');
+            this.load.image('car-e-platform', 'assets/default/car/e/platform.png');
             // car hit
             this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
             this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
@@ -648,6 +652,10 @@ var GameBase;
             this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
             // scene
             this.load.image('main-bg', 'assets/states/main/bg.jpg');
+            this.load.image('upg-header', 'assets/default/upgrade/header.png');
+            this.load.image('upg-btn-attack', 'assets/default/upgrade/attack.png');
+            this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
+            this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -872,12 +880,14 @@ var GameBase;
                 _this.lastHitTime = 0;
                 _this.resetCarsTolerance = 10;
                 _this.resetCarsInterval = 0;
+                _this.battleCount = 0;
                 return _this;
             }
             Battle.prototype.start = function (carA, carB) {
                 var _this = this;
                 this.cars = [carA, carB];
                 console.log('construindo carros');
+                this.battleCount++;
                 // cria / posiciona
                 if (!this.cars[0].builded)
                     this.cars[0].build(new Phaser.Point(100, this.game.world.height - 100), 1);
@@ -914,9 +924,14 @@ var GameBase;
                     this.pushOff();
                     this.pushOff();
                 }
-                // liga os MOTOREEEEESS
-                for (var i in this.cars)
+                // liga os MOTOREEEEESS e reseta o gaude
+                for (var i in this.cars) {
+                    if (this.cars[i].gaude)
+                        this.cars[i].gaude.reset();
+                    //
+                    // motores
                     this.cars[i].engineOn();
+                }
                 //
                 // reseta a flag de termino de batalha
                 this.battleEnd = false;
@@ -958,14 +973,13 @@ var GameBase;
                         //
                         // desliga o motor
                         this.cars[i].engineOff();
+                        // para o gaude, se houver
+                        if (this.cars[i].gaude)
+                            this.cars[i].gaude.stop();
+                        //
                         // da uma empurrada pra tras
                         this.pushOff();
                     }
-                    deadCar.event.add(GameBase.Car.E.CarEvent.OnKill, function () {
-                        console.log('Carro ' + deadCar.name, ' terminou de se destruir');
-                        // dispara o evento de termino
-                        // this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
-                    }, this);
                     this.event.dispatch(GameBase.Battle.E.BattleEvent.OnEnd, winner);
                 }
                 //
@@ -1034,6 +1048,7 @@ var GameBase;
                 _this.playerCar = false;
                 // se já esta montado
                 _this.builded = false;
+                _this.defense = 1;
                 return _this;
             }
             Car.prototype.build = function (position, direction) {
@@ -1184,6 +1199,16 @@ var GameBase;
                 // randomiza o dano
                 var damage = this.game.rnd.integerInRange(damageRange[0], damageRange[1]);
                 damage *= criticalFactor; // critico
+                // subtrai a defesa
+                // 10-(0.3 * 10)
+                console.log('DAMAGE A', damage, this.defense);
+                damage = damage - ((this.defense * 0.1) * damage);
+                damage = parseInt(damage.toString());
+                // garante ao menos um de dano no caso de não crit x 0
+                if (criticalFactor > 0 && damage <= 0)
+                    damage = 1;
+                //
+                console.log('DAMAGE B', damage);
                 var iconUp = new GameBase.Icon.Icon(this.game, '-' + damage);
                 iconUp.create();
                 iconUp.x = this.base.body.x - this.base.width / 2;
@@ -1219,6 +1244,40 @@ var GameBase;
                 this.bodySprite.y = this.base.body.y;
                 this.bodySprite.bringToTop();
             };
+            Car.prototype.upgradeAttack = function (value) {
+                if (value === void 0) { value = 1; }
+                this.damage = [this.damage[0] + value, this.damage[1] + value];
+                console.log('this.damage:', this.damage);
+            };
+            Car.prototype.upgradeDefense = function (value) {
+                if (value === void 0) { value = 2; }
+                this.defense += value;
+                console.log('this.defense:', this.defense);
+            };
+            Car.prototype.upgradeHealth = function (value) {
+                if (value === void 0) { value = 3; }
+                // seleciona uma plataforma que tenha espaço pra folião
+                for (var i = this.platforms.length - 1; i >= 0; i--) {
+                    // espaço disponivel
+                    var slot = this.platforms[i].partyBoysMax - this.platforms[i].partyBoys.length;
+                    if (value <= 0)
+                        return;
+                    //
+                    if (slot > 0) {
+                        var countTotal = value;
+                        for (var j = 0; j < slot; j++) {
+                            var pb = new GameBase.PartyBoy.PartyBoy(this.game);
+                            pb.spriteKey = 'partyboy-' + this.game.rnd.integerInRange(1, 6);
+                            // add
+                            this.platforms[i].addPartyBoys(pb);
+                            value--;
+                            if (value <= 0)
+                                return;
+                            //
+                        }
+                    }
+                }
+            };
             return Car;
         }(Pk.PkElement));
         Car_1.Car = Car;
@@ -1243,7 +1302,7 @@ var GameBase;
                 _this.bodySpriteKey = 'car-a-body';
                 _this.platformSpriteKey = 'car-a-platform';
                 _this.tireSpriteKey = 'car-a-tire';
-                _this.damage = [1, 5];
+                _this.damage = [2, 2];
                 return _this;
             }
             return CarA;
@@ -1262,6 +1321,7 @@ var GameBase;
                 _this.bodySpriteKey = 'car-b-body';
                 _this.platformSpriteKey = 'car-b-platform';
                 _this.tireSpriteKey = 'car-b-tire';
+                _this.defense = 2;
                 return _this;
             }
             return CarB;
@@ -1280,6 +1340,9 @@ var GameBase;
                 _this.bodySpriteKey = 'car-c-body';
                 _this.platformSpriteKey = 'car-c-platform';
                 _this.tireSpriteKey = 'car-c-tire';
+                _this.platformsTotal = 1;
+                _this.defense = 3;
+                _this.damage = [3, 3];
                 return _this;
             }
             return CarC;
@@ -1299,11 +1362,32 @@ var GameBase;
                 _this.platformSpriteKey = 'car-d-platform';
                 _this.tireSpriteKey = 'car-d-tire';
                 _this.platformsTotal = 4;
+                _this.defense = 3;
+                _this.damage = [2, 4];
                 return _this;
             }
             return CarD;
         }(Car.Car));
         Car.CarD = CarD;
+    })(Car = GameBase.Car || (GameBase.Car = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Car;
+    (function (Car) {
+        var CarE = (function (_super) {
+            __extends(CarE, _super);
+            function CarE(game) {
+                var _this = _super.call(this, game) || this;
+                _this.bodySpriteKey = 'car-e-body';
+                _this.platformSpriteKey = 'car-e-platform';
+                _this.tireSpriteKey = 'car-e-tire';
+                _this.damage = [1, 6];
+                return _this;
+            }
+            return CarE;
+        }(Car.Car));
+        Car.CarE = CarE;
     })(Car = GameBase.Car || (GameBase.Car = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
@@ -1407,7 +1491,8 @@ var GameBase;
                 _this.padding = 10;
                 _this.pushForce = -100;
                 _this.locked = false;
-                _this.lockSpeed = 5;
+                _this.lockSpeed = 3;
+                _this.run = true;
                 return _this;
             }
             Gaude.prototype.build = function () {
@@ -1481,13 +1566,22 @@ var GameBase;
                 return hitValue;
             };
             Gaude.prototype.update = function () {
-                if (this.bgTimer.height <= 0)
+                if (this.bgTimer.height <= 0 || !this.run)
                     return;
                 //
                 this.bgTimer.height -= this.lockSpeed;
                 if (this.bgTimer.height <= 0)
                     this.lock();
                 //
+            };
+            Gaude.prototype.stop = function () {
+                this.run = false;
+            };
+            Gaude.prototype.reset = function () {
+                console.log('Gaude Reset');
+                this.run = true;
+                this.unlock();
+                this.push();
             };
             Gaude.prototype.unlock = function () {
                 this.locked = false;
@@ -1654,6 +1748,127 @@ var GameBase;
         Floor_1.Floor = Floor;
     })(Floor = GameBase.Floor || (GameBase.Floor = {}));
 })(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var UpgradeScreen;
+    (function (UpgradeScreen) {
+        var Button = (function (_super) {
+            __extends(Button, _super);
+            function Button(game) {
+                return _super.call(this, game) || this;
+            }
+            Button.prototype.create = function () {
+                var _this = this;
+                this.base = this.game.add.sprite(0, 0, this.key);
+                this.add(this.base);
+                // config btn
+                this.base.inputEnabled = true;
+                this.base.input.useHandCursor = true;
+                this.base.events.onInputDown.add(function () {
+                    _this.event.dispatch(GameBase.UpgradeScreen.E.UpgradeButtonEvent.OnClick);
+                }, this);
+            };
+            return Button;
+        }(Pk.PkElement));
+        UpgradeScreen.Button = Button;
+        var E;
+        (function (E) {
+            var UpgradeButtonEvent;
+            (function (UpgradeButtonEvent) {
+                UpgradeButtonEvent.OnClick = "UpgradeButtonEventOnClick";
+            })(UpgradeButtonEvent = E.UpgradeButtonEvent || (E.UpgradeButtonEvent = {}));
+        })(E = UpgradeScreen.E || (UpgradeScreen.E = {}));
+    })(UpgradeScreen = GameBase.UpgradeScreen || (GameBase.UpgradeScreen = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var UpgradeScreen;
+    (function (UpgradeScreen_1) {
+        var UpgradeScreen = (function (_super) {
+            __extends(UpgradeScreen, _super);
+            function UpgradeScreen(game) {
+                return _super.call(this, game) || this;
+            }
+            UpgradeScreen.prototype.create = function () {
+                var _this = this;
+                this.header = this.game.add.sprite(0, 0, 'upg-header');
+                this.add(this.header);
+                // pos
+                this.header.anchor.x = 0.5;
+                this.header.x = this.game.world.centerX;
+                this.header.y = this.game.world.centerY - this.header.height - 100;
+                this.add(this.header);
+                this.addAttack = new GameBase.UpgradeScreen.Button(this.game);
+                this.addAttack.key = 'upg-btn-attack';
+                this.addAttack.create();
+                this.addAttack.x = 50;
+                this.addAttack.y = this.header.y + this.header.height + 50;
+                this.addAttack.event.add(GameBase.UpgradeScreen.E.UpgradeButtonEvent.OnClick, function (e) {
+                    _this.select(1);
+                }, this);
+                this.add(this.addAttack);
+                this.addDefense = new GameBase.UpgradeScreen.Button(this.game);
+                this.addDefense.key = 'upg-btn-defense';
+                this.addDefense.create();
+                this.addDefense.x = this.game.world.centerX - this.addDefense.width / 2;
+                this.addDefense.y = this.header.y + this.header.height + 150;
+                this.addDefense.event.add(GameBase.UpgradeScreen.E.UpgradeButtonEvent.OnClick, function (e) {
+                    _this.select(2);
+                }, this);
+                this.add(this.addDefense);
+                this.addHealth = new GameBase.UpgradeScreen.Button(this.game);
+                this.addHealth.key = 'upg-btn-health';
+                this.addHealth.create();
+                this.addHealth.x = this.game.world.width - this.addHealth.width - 50;
+                this.addHealth.y = this.header.y + this.header.height + 50;
+                this.addHealth.event.add(GameBase.UpgradeScreen.E.UpgradeButtonEvent.OnClick, function (e) {
+                    _this.select(3);
+                }, this);
+                this.add(this.addHealth);
+                this.addAttack.visible = false;
+                this.addDefense.visible = false;
+                this.addHealth.visible = false;
+                this.header.visible = false;
+            };
+            UpgradeScreen.prototype.select = function (data) {
+                this.event.dispatch(GameBase.UpgradeScreen.E.UpgradeEvent.OnSelect, data);
+                this.close();
+            };
+            UpgradeScreen.prototype.open = function () {
+                for (var i in this.children) {
+                    this.children[i].visible = true;
+                    // header
+                    this.addTween(this.children[i]).from({
+                        y: this.children[i].y - 100,
+                        alpha: 0
+                    }, 300, Phaser.Easing.Circular.Out, true, 200 * parseInt(i)).onComplete.add(function () {
+                        // this.destroy();
+                    }, this);
+                }
+            };
+            UpgradeScreen.prototype.close = function () {
+                var _this = this;
+                // header
+                this.addTween(this).from({
+                    alpha: 100
+                }, 100, Phaser.Easing.Linear.None, true).onComplete.add(function () {
+                    for (var i in _this.children)
+                        _this.children[i].visible = false;
+                    //
+                }, this);
+            };
+            return UpgradeScreen;
+        }(Pk.PkElement));
+        UpgradeScreen_1.UpgradeScreen = UpgradeScreen;
+        var E;
+        (function (E) {
+            var UpgradeEvent;
+            (function (UpgradeEvent) {
+                UpgradeEvent.OnSelect = "UpgradeEventOnSelect";
+            })(UpgradeEvent = E.UpgradeEvent || (E.UpgradeEvent = {}));
+        })(E = UpgradeScreen_1.E || (UpgradeScreen_1.E = {}));
+    })(UpgradeScreen = GameBase.UpgradeScreen || (GameBase.UpgradeScreen = {}));
+})(GameBase || (GameBase = {}));
 /// <reference path='../../pkframe/refs.ts' />
 var GameBase;
 (function (GameBase) {
@@ -1761,11 +1976,14 @@ var GameBase;
             // gerenciador da batalha
             this.battle = new GameBase.Battle.Battle(this.game);
             // carro do jogador
-            this.playerCar = new GameBase.Car.CarA(this.game);
+            this.playerCar = new GameBase.Car.CarE(this.game);
             this.playerCar.playerCar = true;
             this.playerCar.name = 'Carro 1';
             // this.playerCar.damage = [100, 100];
             // inimigos
+            var enemy0 = new GameBase.Car.CarA(this.game);
+            enemy0.direction = -1;
+            enemy0.name = 'Inimigo 0';
             var enemy1 = new GameBase.Car.CarB(this.game);
             enemy1.direction = -1;
             enemy1.name = 'Inimigo 1';
@@ -1775,6 +1993,7 @@ var GameBase;
             var enemy3 = new GameBase.Car.CarD(this.game);
             enemy3.direction = -1;
             enemy3.name = 'Inimigo 3';
+            this.enemies.push(enemy0);
             this.enemies.push(enemy1);
             this.enemies.push(enemy2);
             this.enemies.push(enemy3);
@@ -1787,9 +2006,8 @@ var GameBase;
                 //
                 // se o jogador ganhou, começa a proxima batalha
                 if (winner && winner.getId() == _this.playerCar.getId()) {
-                    setTimeout(function () {
-                        _this.nextBattle();
-                    }, 3000);
+                    // abre o seletor de upgrade
+                    _this.upgradeScreen.open();
                 }
                 else {
                     _this.lose();
@@ -1803,6 +2021,27 @@ var GameBase;
             this.audioLose = this.game.add.audio('audio-battle-lose');
             // começa as paradas
             this.nextBattle();
+            this.upgradeScreen = new GameBase.UpgradeScreen.UpgradeScreen(this.game);
+            this.upgradeScreen.create();
+            this.upgradeScreen.event.add(GameBase.UpgradeScreen.E.UpgradeEvent.OnSelect, function (e, data) {
+                // aplica o upgrade no carro 
+                switch (data) {
+                    case 1:
+                        console.log('UPGRADE ATAQUE');
+                        _this.playerCar.upgradeAttack();
+                        break;
+                    case 2:
+                        console.log('UPGRADE DEFESA');
+                        _this.playerCar.upgradeDefense();
+                        break;
+                    case 3:
+                        console.log('UPGRADE MINIONS');
+                        _this.playerCar.upgradeHealth();
+                        break;
+                }
+                // da o upgrade no carro
+                _this.nextBattle();
+            }, this);
         };
         Main.prototype.nextBattle = function () {
             console.log('-- NEXT BATTLE -- ');
