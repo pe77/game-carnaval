@@ -123,6 +123,10 @@ module GameBase {
             // car hit
             this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
 
+            this.load.audio('car-hit-1', 'assets/default/car/f1.mp3');
+            this.load.audio('car-hit-2', 'assets/default/car/f2.mp3');
+            this.load.audio('car-hit-3', 'assets/default/car/f3.mp3');
+
             this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
             this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
             this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');

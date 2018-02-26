@@ -13,13 +13,25 @@ module GameBase
 
             battleCount:number = 0;
 
+            hit1:Phaser.Sound;
+            hit2:Phaser.Sound;
+            hit3:Phaser.Sound;
+
+            hitAudios:Array<Phaser.Sound> = [];
+            
             constructor(game:Pk.PkGame)
             {
                 super(game);
+
+                this.hit1 	= this.game.add.audio('car-hit-1');
+                this.hit1.volume = 0.3;
+                this.hit2 	= this.game.add.audio('car-hit-2');
+                this.hit3 	= this.game.add.audio('car-hit-3');
+
+                this.hitAudios.push(this.hit1);
+                this.hitAudios.push(this.hit2);
+                this.hitAudios.push(this.hit3);
             }
-
-
-
 
 
             doStart(carA:Car.Car, carB:Car.Car)
@@ -54,6 +66,22 @@ module GameBase
                     // empurra eles em direção contraria
                     this.pushOff();
                     this.pushOff();
+
+                    // solta o audiozinho
+                    switch(this.game.rnd.integerInRange(1, 3))
+                    {
+                        case 1:
+                            this.hitAudios[0].play('', 0, 3.3);
+                            break;
+
+                        case 2:
+                            this.hitAudios[1].play('', 0, 3.3);
+                            break;
+                        
+                        case 3:
+                            this.hitAudios[2].play('', 0, 0.2);
+                            break;
+                    }
 
                     // verifica se já terminou a batalha
                     this.resolve();

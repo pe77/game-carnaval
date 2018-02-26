@@ -647,6 +647,9 @@ var GameBase;
             this.load.image('car-e-platform', 'assets/default/car/e/platform.png');
             // car hit
             this.load.audio('car-sfx-hit', 'assets/default/car/sfx/hit.mp3');
+            this.load.audio('car-hit-1', 'assets/default/car/f1.mp3');
+            this.load.audio('car-hit-2', 'assets/default/car/f2.mp3');
+            this.load.audio('car-hit-3', 'assets/default/car/f3.mp3');
             this.load.audio('audio-battle-bg', 'assets/states/main/audio/bg.mp3');
             this.load.audio('audio-battle-lose', 'assets/states/main/audio/lose.mp3');
             this.load.audio('audio-battle-win', 'assets/states/main/audio/win.mp3');
@@ -888,6 +891,14 @@ var GameBase;
                 _this.resetCarsTolerance = 10;
                 _this.resetCarsInterval = 0;
                 _this.battleCount = 0;
+                _this.hitAudios = [];
+                _this.hit1 = _this.game.add.audio('car-hit-1');
+                _this.hit1.volume = 0.3;
+                _this.hit2 = _this.game.add.audio('car-hit-2');
+                _this.hit3 = _this.game.add.audio('car-hit-3');
+                _this.hitAudios.push(_this.hit1);
+                _this.hitAudios.push(_this.hit2);
+                _this.hitAudios.push(_this.hit3);
                 return _this;
             }
             Battle.prototype.doStart = function (carA, carB) {
@@ -914,6 +925,18 @@ var GameBase;
                     // empurra eles em direção contraria
                     _this.pushOff();
                     _this.pushOff();
+                    // solta o audiozinho
+                    switch (_this.game.rnd.integerInRange(1, 3)) {
+                        case 1:
+                            _this.hitAudios[0].play('', 0, 3.3);
+                            break;
+                        case 2:
+                            _this.hitAudios[1].play('', 0, 3.3);
+                            break;
+                        case 3:
+                            _this.hitAudios[2].play('', 0, 0.2);
+                            break;
+                    }
                     // verifica se já terminou a batalha
                     _this.resolve();
                 }, this);

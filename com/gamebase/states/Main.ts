@@ -23,7 +23,6 @@ module GameBase
 
 		upgradeScreen:UpgradeScreen.UpgradeScreen
 
-
 		init(...args:any[])
 		{
 			super.init(args); // if whant override init, you need this line!
