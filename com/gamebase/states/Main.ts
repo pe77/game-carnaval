@@ -88,6 +88,23 @@ module GameBase
 			this.enemies.push(enemy2);
 			this.enemies.push(enemy3);
 
+
+
+			// particulas
+			// scene particles
+			var front_emitter = this.game.add.emitter(this.game.world.width, -32, 600);
+			front_emitter.makeParticles(['particle-1', 'particle-3', 'particle-2']);
+			front_emitter.maxParticleScale = 0.4;
+			front_emitter.minParticleScale = 0.2;
+			front_emitter.setYSpeed(20, 160);
+			front_emitter.setXSpeed(-20, -100);
+			front_emitter.gravity = 0;
+			front_emitter.width = this.game.world.width * 1.5;
+			front_emitter.minRotation = 5;
+			front_emitter.maxRotation = 40;
+
+			front_emitter.start(false, 14000, 20);
+
 			// evento de fim de batalha
 			this.battle.event.add(Battle.E.BattleEvent.OnEnd, (e, winner:Car.Car)=>{
 				
@@ -120,9 +137,6 @@ module GameBase
 			this.audioWin 	= this.game.add.audio('audio-battle-win');
 			this.audioLose 	= this.game.add.audio('audio-battle-lose');
 
-			// começa as paradas
-			this.nextBattle();
-
 			this.upgradeScreen = new UpgradeScreen.UpgradeScreen(this.game);
 			this.upgradeScreen.create();
 			this.upgradeScreen.event.add(GameBase.UpgradeScreen.E.UpgradeEvent.OnSelect, (e, data)=>{
@@ -148,7 +162,10 @@ module GameBase
 
 				// da o upgrade no carro
 				this.nextBattle();
-			}, this)
+			}, this);
+
+			// começa as paradas
+			// this.nextBattle();
 		}
 
 		nextBattle()

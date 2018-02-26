@@ -16,7 +16,7 @@ module GameBase
                 this.platformsTotal     = 4;
 
                 this.defense = 3;
-                this.damage = [2, 4];
+                this.damage = [1, 4];
             }
 
         }

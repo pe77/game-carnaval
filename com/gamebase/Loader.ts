@@ -134,6 +134,11 @@ module GameBase {
             this.load.image('upg-btn-attack', 'assets/default/upgrade/attack.png');
             this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
             this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
+
+            // particula
+            this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
+            this.load.image('particle-2', 'assets/states/main/images/particles/p2.png');
+            this.load.image('particle-3', 'assets/states/main/images/particles/p3.png');
             
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');

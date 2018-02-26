@@ -656,6 +656,10 @@ var GameBase;
             this.load.image('upg-btn-attack', 'assets/default/upgrade/attack.png');
             this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
             this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
+            // particula
+            this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
+            this.load.image('particle-2', 'assets/states/main/images/particles/p2.png');
+            this.load.image('particle-3', 'assets/states/main/images/particles/p3.png');
             // this.load.image('cinematic-bg', 'assets/states/intro/images/cinematic-bg.jpg');
             // this.load.audio('intro-sound', 'assets/states/intro/sounds/intro.mp3');
             // this.load.spritesheet('char1-idle', 'assets/default/images/chars/heroes/1/iddle.png', 158, 263, 12);
@@ -1302,7 +1306,7 @@ var GameBase;
                 _this.bodySpriteKey = 'car-a-body';
                 _this.platformSpriteKey = 'car-a-platform';
                 _this.tireSpriteKey = 'car-a-tire';
-                _this.damage = [2, 2];
+                _this.damage = [1, 1];
                 return _this;
             }
             return CarA;
@@ -1363,7 +1367,7 @@ var GameBase;
                 _this.tireSpriteKey = 'car-d-tire';
                 _this.platformsTotal = 4;
                 _this.defense = 3;
-                _this.damage = [2, 4];
+                _this.damage = [1, 4];
                 return _this;
             }
             return CarD;
@@ -1997,6 +2001,19 @@ var GameBase;
             this.enemies.push(enemy1);
             this.enemies.push(enemy2);
             this.enemies.push(enemy3);
+            // particulas
+            // scene particles
+            var front_emitter = this.game.add.emitter(this.game.world.width, -32, 600);
+            front_emitter.makeParticles(['particle-1', 'particle-3', 'particle-2']);
+            front_emitter.maxParticleScale = 0.4;
+            front_emitter.minParticleScale = 0.2;
+            front_emitter.setYSpeed(20, 160);
+            front_emitter.setXSpeed(-20, -100);
+            front_emitter.gravity = 0;
+            front_emitter.width = this.game.world.width * 1.5;
+            front_emitter.minRotation = 5;
+            front_emitter.maxRotation = 40;
+            front_emitter.start(false, 14000, 20);
             // evento de fim de batalha
             this.battle.event.add(GameBase.Battle.E.BattleEvent.OnEnd, function (e, winner) {
                 if (winner)
@@ -2019,8 +2036,6 @@ var GameBase;
             // registra os sfx
             this.audioWin = this.game.add.audio('audio-battle-win');
             this.audioLose = this.game.add.audio('audio-battle-lose');
-            // começa as paradas
-            this.nextBattle();
             this.upgradeScreen = new GameBase.UpgradeScreen.UpgradeScreen(this.game);
             this.upgradeScreen.create();
             this.upgradeScreen.event.add(GameBase.UpgradeScreen.E.UpgradeEvent.OnSelect, function (e, data) {
@@ -2042,6 +2057,8 @@ var GameBase;
                 // da o upgrade no carro
                 _this.nextBattle();
             }, this);
+            // começa as paradas
+            // this.nextBattle();
         };
         Main.prototype.nextBattle = function () {
             console.log('-- NEXT BATTLE -- ');
