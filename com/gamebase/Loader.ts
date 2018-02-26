@@ -135,6 +135,9 @@ module GameBase {
             this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
             this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
 
+            this.load.image('game-end-win', 'assets/states/main/images/end-victory.png');
+            this.load.image('game-end-lose', 'assets/states/main/images/end-lose.png');
+
             // particula
             this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
             this.load.image('particle-2', 'assets/states/main/images/particles/p2.png');

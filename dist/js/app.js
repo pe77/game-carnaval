@@ -656,6 +656,8 @@ var GameBase;
             this.load.image('upg-btn-attack', 'assets/default/upgrade/attack.png');
             this.load.image('upg-btn-defense', 'assets/default/upgrade/defense.png');
             this.load.image('upg-btn-health', 'assets/default/upgrade/health.png');
+            this.load.image('game-end-win', 'assets/states/main/images/end-victory.png');
+            this.load.image('game-end-lose', 'assets/states/main/images/end-lose.png');
             // particula
             this.load.image('particle-1', 'assets/states/main/images/particles/p1.png');
             this.load.image('particle-2', 'assets/states/main/images/particles/p2.png');
@@ -887,7 +889,7 @@ var GameBase;
                 _this.battleCount = 0;
                 return _this;
             }
-            Battle.prototype.start = function (carA, carB) {
+            Battle.prototype.doStart = function (carA, carB) {
                 var _this = this;
                 this.cars = [carA, carB];
                 console.log('construindo carros');
@@ -939,6 +941,32 @@ var GameBase;
                 //
                 // reseta a flag de termino de batalha
                 this.battleEnd = false;
+            };
+            Battle.prototype.start = function (carA, carB) {
+                var _this = this;
+                var iconUp = new GameBase.Battle.Icon(this.game, 'Ready');
+                iconUp.create();
+                iconUp.x = this.game.world.centerX;
+                iconUp.y = this.game.world.centerY;
+                iconUp.go();
+                setTimeout(function () {
+                    var iconUp = new GameBase.Battle.Icon(_this.game, 'Set');
+                    iconUp.create();
+                    iconUp.x = _this.game.world.centerX;
+                    iconUp.y = _this.game.world.centerY;
+                    iconUp.go();
+                }, 500);
+                setTimeout(function () {
+                    var iconUp = new GameBase.Battle.Icon(_this.game, 'GO!');
+                    iconUp.create();
+                    iconUp.x = _this.game.world.centerX;
+                    iconUp.y = _this.game.world.centerY;
+                    iconUp.go();
+                }, 1000);
+                // espera um pouco
+                setTimeout(function () {
+                    _this.doStart(carA, carB);
+                }, 1500);
             };
             // empurra os carros em direção contraria
             Battle.prototype.pushOff = function () {
@@ -1021,6 +1049,44 @@ var GameBase;
                 BattleEvent.OnEnd = "BattleEventEnd";
             })(BattleEvent = E.BattleEvent || (E.BattleEvent = {}));
         })(E = Battle_1.E || (Battle_1.E = {}));
+    })(Battle = GameBase.Battle || (GameBase.Battle = {}));
+})(GameBase || (GameBase = {}));
+var GameBase;
+(function (GameBase) {
+    var Battle;
+    (function (Battle) {
+        var Icon = (function (_super) {
+            __extends(Icon, _super);
+            function Icon(game, message) {
+                var _this = _super.call(this, game) || this;
+                _this.message = message;
+                return _this;
+            }
+            Icon.prototype.create = function () {
+                this.text = this.game.add.text(0, 0, this.message, // text
+                {
+                    font: "48px Love Story Rough",
+                    fill: "#202020"
+                } // font style
+                );
+                this.text.anchor.x = 0.5;
+                this.add(this.text);
+            };
+            Icon.prototype.go = function () {
+                var _this = this;
+                this.addTween(this).from({
+                    alpha: 0
+                }, 500, Phaser.Easing.Circular.Out, true).onComplete.add(function () {
+                    _this.destroy();
+                }, this);
+                this.addTween(this.scale).from({
+                    x: 0
+                }, 490, Phaser.Easing.Circular.Out, true).onComplete.add(function () {
+                }, this);
+            };
+            return Icon;
+        }(Pk.PkElement));
+        Battle.Icon = Icon;
     })(Battle = GameBase.Battle || (GameBase.Battle = {}));
 })(GameBase || (GameBase = {}));
 var GameBase;
@@ -1130,7 +1196,7 @@ var GameBase;
                         _this.gaude = new GameBase.Gaude.Gaude(_this.game);
                         _this.gaude.build();
                     }
-                }, 1000);
+                }, 300);
                 for (var i_2 = 0; i_2 < 2; i_2++) {
                     this.driveJoints[i_2].EnableMotor(true);
                     this.driveJoints[i_2].SetMotorSpeed(this.motorSpeed * this.direction);
@@ -1983,7 +2049,7 @@ var GameBase;
             this.playerCar = new GameBase.Car.CarE(this.game);
             this.playerCar.playerCar = true;
             this.playerCar.name = 'Carro 1';
-            // this.playerCar.damage = [100, 100];
+            this.playerCar.damage = [100, 100];
             // inimigos
             var enemy0 = new GameBase.Car.CarA(this.game);
             enemy0.direction = -1;
@@ -1998,9 +2064,9 @@ var GameBase;
             enemy3.direction = -1;
             enemy3.name = 'Inimigo 3';
             this.enemies.push(enemy0);
-            this.enemies.push(enemy1);
-            this.enemies.push(enemy2);
-            this.enemies.push(enemy3);
+            // this.enemies.push(enemy1);
+            // this.enemies.push(enemy2);
+            // this.enemies.push(enemy3);
             // particulas
             // scene particles
             var front_emitter = this.game.add.emitter(this.game.world.width, -32, 600);
@@ -2023,8 +2089,14 @@ var GameBase;
                 //
                 // se o jogador ganhou, começa a proxima batalha
                 if (winner && winner.getId() == _this.playerCar.getId()) {
-                    // abre o seletor de upgrade
-                    _this.upgradeScreen.open();
+                    // se ainda houver inimigo
+                    if (_this.getNextEnemy()) {
+                        // abre o seletor de upgrade
+                        _this.upgradeScreen.open();
+                    }
+                    else {
+                        _this.win();
+                    }
                 }
                 else {
                     _this.lose();
@@ -2054,14 +2126,26 @@ var GameBase;
                         _this.playerCar.upgradeHealth();
                         break;
                 }
-                // da o upgrade no carro
+                // espera um pouco e toca o proximo
                 _this.nextBattle();
             }, this);
             // começa as paradas
-            // this.nextBattle();
+            this.nextBattle();
         };
         Main.prototype.nextBattle = function () {
             console.log('-- NEXT BATTLE -- ');
+            // pega o carro do jogador + p proximo inimigo vivo
+            var nextEnemy = this.getNextEnemy();
+            // se existir outro inimigo
+            if (nextEnemy)
+                this.battle.start(this.playerCar, nextEnemy); // começa
+            //
+            // se a musica de fundo não estiver rolando, roda
+            if (!this.musicBG.isPlaying)
+                this.musicBG.play('', 0, 1.0, true);
+            //
+        };
+        Main.prototype.getNextEnemy = function () {
             // pega o carro do jogador + p proximo inimigo vivo
             var nextEnemy;
             for (var i in this.enemies) {
@@ -2071,25 +2155,40 @@ var GameBase;
                 nextEnemy = this.enemies[i];
                 break;
             }
-            // se existir outro inimigo
-            if (nextEnemy) {
-                console.log(this.playerCar.name, ':: x ::', this.enemies[i].name);
-                this.battle.start(this.playerCar, nextEnemy);
-            }
-            else
-                this.win();
-            //
-            // se a musica de fundo não estiver rolando, roda
-            if (!this.musicBG.isPlaying)
-                this.musicBG.play('', 0, 1.0, true);
-            //
+            return nextEnemy;
         };
         Main.prototype.win = function () {
-            this.audioWin.play('', 0, 0.7);
+            this.musicBG.fadeOut(200);
+            this.audioWin.play('', 0, 1);
+            // 
+            console.log('WIN SCREEN');
+            var endScreen = this.game.add.sprite(0, 0, 'game-end-win');
+            endScreen.anchor.set(0.5, 0.5);
+            endScreen.x = this.game.world.centerX;
+            endScreen.y = this.game.world.centerY;
+            this.game.add.tween(endScreen).from({
+                y: endScreen.y - 800
+            }, 2500, Phaser.Easing.Bounce.Out, true).onComplete.add(function () {
+                console.log('END TWEEN WIN SCREEN');
+            }, this);
         };
         Main.prototype.lose = function () {
             this.musicBG.fadeOut(200);
-            this.audioLose.fadeIn(200);
+            this.audioLose.play('', 0, 1);
+            var endScreen = this.game.add.sprite(0, 0, 'game-end-lose');
+            endScreen.anchor.set(0.5, 0.5);
+            endScreen.x = this.game.world.centerX;
+            endScreen.y = this.game.world.centerY;
+            this.game.add.tween(endScreen).from({
+                y: endScreen.y - 800
+            }, 2500, Phaser.Easing.Bounce.Out, true).onComplete.add(function () {
+                console.log('END TWEEN WIN SCREEN');
+            }, this);
+            endScreen.inputEnabled = true;
+            endScreen.input.useHandCursor = true;
+            endScreen.events.onInputDown.add(function () {
+                window.location.reload();
+            }, this);
         };
         Main.prototype.playSound = function () {
             // play music

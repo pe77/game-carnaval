@@ -167,9 +167,7 @@ module GameBase
                         this.gaude = new Gaude.Gaude(this.game);
                         this.gaude.build();
                     }
-                }, 1000)
-
-
+                }, 300)
 
                 for (let i = 0; i < 2; i++) {
                     this.driveJoints[i].EnableMotor(true);

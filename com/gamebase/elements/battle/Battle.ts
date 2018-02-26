@@ -19,7 +19,10 @@ module GameBase
             }
 
 
-            start(carA:Car.Car, carB:Car.Car)
+
+
+
+            doStart(carA:Car.Car, carB:Car.Car)
             {
                 this.cars = [carA, carB];
                 
@@ -75,8 +78,6 @@ module GameBase
                     this.pushOff();
                     this.pushOff();
                 }
-                
-
 
                 // liga os MOTOREEEEESS e reseta o gaude
                 for(var i in this.cars)
@@ -94,6 +95,40 @@ module GameBase
 
                 // reseta a flag de termino de batalha
                 this.battleEnd = false;
+            }
+
+            start(carA:Car.Car, carB:Car.Car)
+            {
+                var iconUp:Battle.Icon = new GameBase.Battle.Icon(this.game, 'Ready');
+                iconUp.create();
+                iconUp.x = this.game.world.centerX;
+                iconUp.y = this.game.world.centerY;
+
+                iconUp.go();
+
+                setTimeout(()=>{
+                    var iconUp:Battle.Icon = new GameBase.Battle.Icon(this.game, 'Set');
+                    iconUp.create();
+                    iconUp.x = this.game.world.centerX;
+                    iconUp.y = this.game.world.centerY;
+
+                    iconUp.go();
+                }, 500);
+
+
+                setTimeout(()=>{
+                    var iconUp:Battle.Icon = new GameBase.Battle.Icon(this.game, 'GO!');
+                    iconUp.create();
+                    iconUp.x = this.game.world.centerX;
+                    iconUp.y = this.game.world.centerY;
+
+                    iconUp.go();
+                }, 1000);
+
+                // espera um pouco
+                setTimeout(()=>{
+                    this.doStart(carA, carB);
+                }, 1500);
             }
 
             // empurra os carros em direção contraria

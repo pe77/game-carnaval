@@ -64,7 +64,7 @@ module GameBase
 			this.playerCar = new Car.CarE(this.game);
 			this.playerCar.playerCar = true;
 			this.playerCar.name = 'Carro 1';
-			// this.playerCar.damage = [100, 100];
+			this.playerCar.damage = [100, 100];
 
 			// inimigos
 			var enemy0 = new Car.CarA(this.game);
@@ -84,9 +84,9 @@ module GameBase
 			enemy3.name = 'Inimigo 3';
 
 			this.enemies.push(enemy0);
-			this.enemies.push(enemy1);
-			this.enemies.push(enemy2);
-			this.enemies.push(enemy3);
+			// this.enemies.push(enemy1);
+			// this.enemies.push(enemy2);
+			// this.enemies.push(enemy3);
 
 
 
@@ -117,8 +117,15 @@ module GameBase
 				// se o jogador ganhou, começa a proxima batalha
 				if(winner && winner.getId() == this.playerCar.getId())
 				{
-					// abre o seletor de upgrade
-					this.upgradeScreen.open();
+					// se ainda houver inimigo
+					if(this.getNextEnemy())
+					{
+						// abre o seletor de upgrade
+						this.upgradeScreen.open();
+					}else{
+						this.win();
+					}
+					
 					
 				}
 				else
@@ -160,18 +167,36 @@ module GameBase
 						break;
 				}
 
-				// da o upgrade no carro
+				// espera um pouco e toca o proximo
 				this.nextBattle();
+				
 			}, this);
 
 			// começa as paradas
-			// this.nextBattle();
+			this.nextBattle();
 		}
 
 		nextBattle()
 		{
 			console.log('-- NEXT BATTLE -- ');
 
+			// pega o carro do jogador + p proximo inimigo vivo
+			var nextEnemy:Car.Car = this.getNextEnemy();
+
+			// se existir outro inimigo
+			if(nextEnemy)
+				this.battle.start(this.playerCar, nextEnemy); // começa
+			//
+
+			
+			// se a musica de fundo não estiver rolando, roda
+			if(!this.musicBG.isPlaying)
+				this.musicBG.play('', 0, 1.0, true);
+			//
+		}
+
+		getNextEnemy():Car.Car
+		{
 			// pega o carro do jogador + p proximo inimigo vivo
 			var nextEnemy:Car.Car;
 			for(var i in this.enemies)
@@ -185,31 +210,65 @@ module GameBase
 				break;
 			}
 
-			// se existir outro inimigo
-			if(nextEnemy)
-			{
-				console.log(this.playerCar.name, ':: x ::', this.enemies[i].name);
-				this.battle.start(this.playerCar, nextEnemy);
-			}else
-				this.win();
-			//
-
-			
-			// se a musica de fundo não estiver rolando, roda
-			if(!this.musicBG.isPlaying)
-				this.musicBG.play('', 0, 1.0, true);
-			//
+			return nextEnemy;
 		}
 
 		win()
 		{
-			this.audioWin.play('', 0, 0.7);
+			this.musicBG.fadeOut(200);
+			this.audioWin.play('', 0, 1);
+
+			// 
+			console.log('WIN SCREEN')
+
+			var endScreen:Phaser.Sprite = this.game.add.sprite(0, 0, 'game-end-win');
+			endScreen.anchor.set(0.5, 0.5);
+
+			endScreen.x = this.game.world.centerX;
+			endScreen.y = this.game.world.centerY;
+
+			this.game.add.tween(endScreen).from(
+				{
+					y:endScreen.y-800
+				}, 
+				2500, 
+				Phaser.Easing.Bounce.Out, 
+				true
+			).onComplete.add(()=>{
+				console.log('END TWEEN WIN SCREEN')
+			}, this);
+
 		}
 
 		lose()
 		{
 			this.musicBG.fadeOut(200);
-			this.audioLose.fadeIn(200);
+			this.audioLose.play('', 0, 1);
+
+			var endScreen:Phaser.Sprite = this.game.add.sprite(0, 0, 'game-end-lose');
+			endScreen.anchor.set(0.5, 0.5);
+
+			endScreen.x = this.game.world.centerX;
+			endScreen.y = this.game.world.centerY;
+
+			this.game.add.tween(endScreen).from(
+				{
+					y:endScreen.y-800
+				}, 
+				2500, 
+				Phaser.Easing.Bounce.Out, 
+				true
+			).onComplete.add(()=>{
+				console.log('END TWEEN WIN SCREEN')
+			}, this);
+
+			endScreen.inputEnabled = true;
+            endScreen.input.useHandCursor = true;
+
+			endScreen.events.onInputDown.add(()=>{
+				window.location.reload();
+			}, this);
+
 		}
 
 		playSound()
